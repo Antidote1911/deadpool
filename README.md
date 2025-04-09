@@ -1,5 +1,7 @@
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](https://github.com/Antidote1911/deadpool/blob/master/LICENSE-MIT)
 [![made-with-rust](https://img.shields.io/badge/Made%20with-Rust-1f425f.svg)](https://www.rust-lang.org/)
+[![CI Tests](https://github.com/Antidote1911/deadpool/actions/workflows/tests.yml/badge.svg)](https://github.com/Antidote1911/deadpool/actions/workflows/tests.yml)
+
 # 🔑 Deadpool and Shuffle
 
 Deadpool is a crate to generate passwords and Shuffle a command-line application to demonstrate how to use it.
