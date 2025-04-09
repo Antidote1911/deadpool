@@ -1,4 +1,4 @@
-[![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](https://github.com/Antidote1911/shuffle/blob/master/LICENSE-MIT)
+[![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](https://github.com/Antidote1911/deadpool/blob/master/LICENSE-MIT)
 [![made-with-rust](https://img.shields.io/badge/Made%20with-Rust-1f425f.svg)](https://www.rust-lang.org/)
 # 🔑 Deadpool and Shuffle
 
@@ -12,8 +12,8 @@ let mut pool = Pool::new();
 pool.extend_from_uppercase();
 pool.extend_from_digits();
 pool.extend_from_dashes();
-pool.extend_from_string("@é0");
-pool.exclude_chars("0Oo1iIlL5S"); // exclude ambigous
+pool.extend_from_string("@é=");
+pool.exclude_chars("0Oo1iIlL5S"); // exclude some ambigous
 ...
 ...
 let password = pool.generate(25)
@@ -22,7 +22,7 @@ let password = pool.generate(25)
 
 ## Usage for shuffle cli application
 
-The generated password always contains at least one character from the selected groups and from --include option.
+The generated passwords always contains at least one character from the selected groups and from --include option.
 Without argument, the generated password is 10 characters long and uses lowercase letters and numbers.
 ```
 # similar to ./shuffle -ld -L 10
@@ -30,7 +30,7 @@ Without argument, the generated password is 10 characters long and uses lowercas
 uabhbunf0q
 ```
 
-Generate 3 password with 30 chars with lower,digits,maths and include "@éèà%M":
+Generate 3 passwords with 30 chars with lower,digits,maths and include @ é è à % M
 ```
 ./shuffle --count 3 -L 30 -ldm --include "@éèà%M"
 0c3mi<l1=Ma6xfujp>ddc3%%*n76èp
@@ -38,7 +38,7 @@ Generate 3 password with 30 chars with lower,digits,maths and include "@éèà%M
 tz6z99iwà1h!s+Mg4iv5t%@%5kenq8
 ```
 
-Generate a password with 30 chars with only digits and exclude 0,1,2,3 and 4:
+Generate a password with 30 chars with only digits and exclude 0,1,2,3,4 and 5
 ```
 ./shuffle -d -L 30 --exclude 012345 
 879866968679799766976867796776
