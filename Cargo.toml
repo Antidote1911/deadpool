@@ -3,7 +3,8 @@ resolver = "2"
 
 members = [
 	"deadpool",
-	"shuffle_cli"
+	"shuffle_cli",
+	"shuffle_gui"
 ]
 
 [profile.release]

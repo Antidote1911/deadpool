@@ -1,0 +1,10 @@
+[package]
+name = "shuffle_gui"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+egui = "0.31.1"  # Check for the latest version
+eframe = "0.31.1"  # Check for the latest version
+image = "0.25.6"
+deadpool = { path = "../deadpool" }
