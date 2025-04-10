@@ -24,9 +24,3 @@ The project is setup as a **Qt Creator** project and can be easily imported as s
 4. Click **Generate**.
 5. Click the **Copy** button to copy the password to the clipboard.
 
-
-## GUI Samples
-Sample 1            |  Sample 2
-:-------------------------:|:-------------------------:
-![StrongPasswordGenerator_R6tbLdTNPk](https://github.com/user-attachments/assets/737a34be-9aca-47b4-93ef-a975169525dd)  | ![StrongPasswordGenerator_LLZ012xg9Y](https://github.com/user-attachments/assets/4cf45cbb-c934-4b21-ad4b-bb71ed2e07c2)
-
