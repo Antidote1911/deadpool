@@ -41,7 +41,7 @@ set(PROJECT_SOURCES
 add_executable(qtpassgen ${PROJECT_SOURCES})
 
 if (WIN32)
-    target_link_libraries(qtpassgen PRIVATE Qt6::Widgets ntdll advapi32 user32 ws2_32 userenv ${CMAKE_CURRENT_SOURCE_DIR}/../target/release/libcpp_adapter.lib)
+    target_link_libraries(qtpassgen PRIVATE Qt6::Widgets ntdll advapi32 user32 ws2_32 userenv ${CMAKE_CURRENT_SOURCE_DIR}/../target/release/cpp_adapter.lib)
 endif (WIN32)
 
 if (UNIX)
