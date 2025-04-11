@@ -10,7 +10,7 @@ Deadpool is a crate to generate passwords and Shuffle a command-line application
 
 <img src='screenshots/qt_gui.png'/>
 
-*The qt6 gui.* To build, run cargo --release on the root of this repo to build the deadpool lib and cppadapter adapter lib.
+To build the qt6 gui, run cargo --release on the root of this repo to generate the deadpool lib and cppadapter lib.
 Go in the qtgui folder to run build.sh. cmake, Qt6 and ninja must be instaled on your system.
 
 ```
