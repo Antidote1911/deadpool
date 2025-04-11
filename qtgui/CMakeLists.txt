@@ -40,9 +40,12 @@ set(PROJECT_SOURCES
 
 add_executable(qtpassgen ${PROJECT_SOURCES})
 
-target_link_libraries(qtpassgen PRIVATE Qt6::Widgets ${CMAKE_CURRENT_SOURCE_DIR}/../target/release/libcpp_adapter.a)
+if (WIN32)
+    target_link_libraries(qtpassgen PRIVATE Qt6::Widgets ntdll advapi32 user32 ws2_32 userenv ${CMAKE_CURRENT_SOURCE_DIR}/../target/release/libcpp_adapter.lib)
+endif (WIN32)
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  # using Visual Studio C++
-  target_link_libraries(qtpassgen PRIVATE advapi32 user32 ws2_32)
-endif()
+if (UNIX)
+    target_link_libraries(qtpassgen PRIVATE Qt6::Widgets dl ${CMAKE_CURRENT_SOURCE_DIR}/../target/release/libcpp_adapter.a)
+endif (UNIX)
+
+
