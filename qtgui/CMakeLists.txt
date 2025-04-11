@@ -44,5 +44,5 @@ target_link_libraries(qtpassgen PRIVATE Qt6::Widgets ${CMAKE_CURRENT_SOURCE_DIR}
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   # using Visual Studio C++
-  target_link_libraries(shredder PRIVATE advapi32 user32 ws2_32)
+  target_link_libraries(qtpassgen PRIVATE advapi32 user32 ws2_32)
 endif()
