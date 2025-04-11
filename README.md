@@ -5,7 +5,24 @@
 # 🔑 Deadpool and Shuffle
 
 Deadpool is a crate to generate passwords and Shuffle a command-line application to demonstrate how to use it.
-Deadpool is verry simple.
+
+**Bonus:** An interface using Qt6/C++ is also included.
+
+<img src='screenshots/qt_gui.png'/>
+
+*The qt6 gui.* To build, run cargo --release on the root of this repo to build the deadpool lib and cppadapter adapter lib.
+Go in the qtgui folder to run build.sh. cmake, Qt6 and ninja must be instaled on your system.
+
+```
+./build.sh
+```
+
+<img src='screenshots/rust_gui.png'/>
+
+*The rust gui.*
+
+## Usage for Deadpool crate
+Deadpool is very simple.
 
 ```
 use deadpool::*;
