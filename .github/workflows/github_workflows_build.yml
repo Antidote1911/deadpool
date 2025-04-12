@@ -76,7 +76,7 @@ jobs:
         
     - name: Calculate checksum
       run: |
-        certutil -hashfile build/deadpool.zip SHA256 > build/src/deadpool.zip.sha256
+        certutil -hashfile build/deadpool.zip SHA256 > build/deadpool.zip.sha256
         
     - name: Create GitHub Release
       id: create_release
@@ -105,6 +105,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: build/src/deadpool.zip.sha256
+        asset_path: build/deadpool.zip.sha256
         asset_name: deadpool_win_x64_${{ github.ref_name }}.zip.sha256
         asset_content_type: text/plain
