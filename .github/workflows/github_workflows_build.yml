@@ -14,11 +14,13 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@main
+    
     - name: Setup msbuild
       uses: microsoft/setup-msbuild@v2
       with:
         vs-version: '[17,18)'  # 17.xx
         msbuild-architecture: x64
+        
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
@@ -27,13 +29,16 @@ jobs:
         target:       desktop
         modules:      qtmultimedia
         setup-python: false
+        
     - name: Set up Rust
       uses: actions-rs/toolchain@v1
       with:
         toolchain: stable
-        override: true        
+        override: true
+        
     - name: Build Rust project
       run: cargo build --release
+      
     - name: build
       shell: cmd
       run: |
@@ -41,9 +46,11 @@ jobs:
         set CL=/MP
         cmake -B./build -S. ${{ github.workspace }}\qtgui
         cmake --build ./build --config ${{env.Configuration}}
+        
     - name: deploy
       run:  |        
         windeployqt.exe --no-compiler-runtime --release build\Release\qtpassgen.exe
+        
     - name: cleaning
       shell: cmd
       run:  |
@@ -60,14 +67,44 @@ jobs:
         del /F build\Release\Qt6Svg.dll
         del /F build\Release\D3Dcompiler_47.dll
         del /F build\Release\opengl32sw.dll
+        
     - name: Compress artifacts
       uses: vimtor/action-zip@v1.1
       with:
         files: build\Release
         dest: "build/deadpool.zip"
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v4
+        
+    - name: Calculate checksum
+      run: |
+        certutil -hashfile build/deadpool.zip SHA256 > build/src/deadpool.zip.sha256
+        
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        name: deadpool.zip
-        path: build\Release
-
+        tag_name: ${{ github.ref_name }}
+        release_name: Release ${{ github.ref_name }}
+        draft: false
+        prerelease: false
+        
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: build/deadpool.zip
+        asset_name: deadpool_win_x64_${{ github.ref_name }}.zip
+        asset_content_type: application/zip
+        
+    - name: Upload Checksum File
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: build/src/deadpool.zip.sha256
+        asset_name: deadpool_win_x64_${{ github.ref_name }}.zip.sha256
+        asset_content_type: text/plain
