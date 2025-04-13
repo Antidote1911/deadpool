@@ -1,6 +1,6 @@
 [package]
 name = "cpp_adapter"
-version = "3.1.0"
+version = "0.5.0"
 authors = ["Antidote1911 <antidote1911@gmail.com>"]
 edition = "2021"
 
