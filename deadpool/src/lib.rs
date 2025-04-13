@@ -1,4 +1,8 @@
 use rand::prelude::SliceRandom;
+use rand::{Rng, SeedableRng};
+use rand_hc::Hc128Rng;
+use rand_isaac::Isaac64Rng;
+
 mod errors;
 use errors::PasswordError;
 
@@ -113,9 +117,9 @@ impl Pool {
 
     /// Extends the pool with a custom string, replacing excluded characters with random authorized characters.
     pub fn extend_from_string(&mut self, custom_string: &str) {
-        use rand::Rng;
+        let mut isaac_seeder = Isaac64Rng::from_os_rng();
+        let mut rng = Hc128Rng::from_rng(&mut isaac_seeder);
 
-        let mut rng = rand::rng();
         let excluded_chars = self.excluded_chars.as_deref().unwrap_or("");
 
         let extended_string: String = custom_string.chars()
@@ -142,7 +146,6 @@ impl Pool {
 
     /// Generates a password of the specified length from the pool.
     pub fn generate(&self, length: usize) -> Result<String, PasswordError> {
-        use rand::Rng;
 
         if length == 0 {
             return Err(PasswordError::ZeroLengthPassword);
@@ -152,7 +155,9 @@ impl Pool {
             return Err(PasswordError::EmptyCharacterPool);
         }
 
-        let mut rng = rand::rng();
+        let mut isaac_seeder = Isaac64Rng::from_os_rng();
+        let mut rng = Hc128Rng::from_rng(&mut isaac_seeder);
+
         let excluded_chars = self.excluded_chars.as_deref().unwrap_or("");
 
         let mut password: Vec<char> = Vec::with_capacity(length);
