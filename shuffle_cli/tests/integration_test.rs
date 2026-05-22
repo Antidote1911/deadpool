@@ -29,18 +29,22 @@ mod tests {
     #[test]
     fn test_generate_password_default_length() {
         for _ in 0..30 {
-            cmd().assert().stdout(predicate::function(|s: &str| s.trim().len() == 10));
+            cmd()
+                .assert()
+                .stdout(predicate::function(|s: &str| s.trim().len() == 10));
         }
     }
-
 
     #[test]
     fn test_generate_password_specified_length() {
         let expected_length = 24;
         for _ in 0..100 {
-            cmd().args(&["-L", "24"])
+            cmd()
+                .args(&["-L", "24"])
                 .assert()
-                .stdout(predicate::function(|s: &str| s.trim().chars().count() == expected_length));
+                .stdout(predicate::function(|s: &str| {
+                    s.trim().chars().count() == expected_length
+                }));
         }
     }
 
@@ -69,7 +73,6 @@ mod tests {
         }
     }
 
-
     #[test]
     fn test_generate_multiple_passwords() {
         let count = 100;
@@ -82,9 +85,7 @@ mod tests {
             .clone();
 
         let binding = String::from_utf8_lossy(&output);
-        let passwords: Vec<&str> = binding
-            .lines()
-            .collect();
+        let passwords: Vec<&str> = binding.lines().collect();
 
         assert_eq!(passwords.len(), count);
         for password in passwords {
@@ -102,14 +103,25 @@ mod tests {
 
         // Exécution de la commande
         let mut cmd = Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap();
-        cmd.args(&["--output", output_path.to_str().unwrap(), "-L", "20", "-dlu"])
-            .assert()
-            .success();
+        cmd.args(&[
+            "--output",
+            output_path.to_str().unwrap(),
+            "-L",
+            "20",
+            "-dlu",
+        ])
+        .assert()
+        .success();
 
         // Vérification du contenu du fichier
-        let output_content = std::fs::read_to_string(output_path)
-            .expect("Échec de la lecture du fichier de sortie");
-        assert_eq!(output_content.trim().chars().count(), expected_length, "Le contenu du fichier ne correspond pas à la longueur attendue. Contenu : '{}'", output_content);
+        let output_content =
+            std::fs::read_to_string(output_path).expect("Échec de la lecture du fichier de sortie");
+        assert_eq!(
+            output_content.trim().chars().count(),
+            expected_length,
+            "Le contenu du fichier ne correspond pas à la longueur attendue. Contenu : '{}'",
+            output_content
+        );
     }
 
     #[test]
@@ -126,13 +138,13 @@ mod tests {
             .stdout(predicate::function(move |s: &str| {
                 let password = s.trim();
                 password.len() == length && password.chars().all(|c| include_chars.contains(c))
-            }));   // Vérifie le motif
+            })); // Vérifie le motif
     }
 
     #[test]
     fn test_generate_password_only_one_char() {
         let include_chars = "X"; // Caractère à inclure
-        let length = 12;        // Longueur du mot de passe à générer
+        let length = 12; // Longueur du mot de passe à générer
         let expected_output = "XXXXXXXXXXXX\n"; // Résultat attendu
 
         let mut command = cmd();

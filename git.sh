@@ -33,7 +33,7 @@ require_git() {
 
 # ── Gestion des dossiers à ignorer ───────────────────────────────────────────
 # Liste des patterns à toujours ignorer (personnalisable)
-IGNORE_PATTERNS=("target/" "node_modules/" ".env" "dist/" "__pycache__/" ".claude/" ".idea/")
+IGNORE_PATTERNS=("target/" "node_modules/" ".env" "dist/" "__pycache__/")
 
 setup_gitignore() {
   [[ ! -f .gitignore ]] && touch .gitignore
@@ -370,6 +370,56 @@ do_purge_large_file() {
   success "✅ Fichier purgé de l'historique. Le push devrait maintenant fonctionner."
 }
 
+# ── Release : commit + push + tag annoté ─────────────────────────────────────
+do_release() {
+  title "Release — Commit + Push + Tag"
+
+  # Version depuis le Cargo.toml workspace (ligne : version = "x.y.z")
+  local cargo_version=""
+  if [[ -f "Cargo.toml" ]]; then
+    cargo_version=$(sed -n 's/^version\s*=\s*"\(.*\)"/\1/p' Cargo.toml | head -1)
+  fi
+  local suggested_tag="v${cargo_version}"
+
+  info "Version Cargo.toml : ${BOLD}${cargo_version:-inconnue}${RESET}"
+  info "Tags existants :"
+  git tag --sort=-version:refname | head -5 || echo "  (aucun)"
+  echo ""
+  sep
+
+  # ── Étape 1 : commit + push ──────────────────────────────────────────────────
+  title "Étape 1/2 — Commit + Push"
+  commit_and_push ""
+
+  echo ""
+  sep
+
+  # ── Étape 2 : tag annoté ─────────────────────────────────────────────────────
+  title "Étape 2/2 — Créer le tag de release"
+
+  read -rp "$(echo -e "${YELLOW}? ${RESET}Nom du tag [${BOLD}${suggested_tag}${RESET}] : ")" tag
+  tag="${tag:-$suggested_tag}"
+
+  [[ -z "$tag" ]] && { error "Nom de tag vide — annulé."; return; }
+
+  if git rev-parse "$tag" &>/dev/null 2>&1; then
+    error "Le tag '${tag}' existe déjà — annulé."
+    return
+  fi
+
+  read -rp "$(echo -e "${YELLOW}? ${RESET}Message du tag [Release ${tag}] : ")" tmsg
+  tmsg="${tmsg:-Release ${tag}}"
+
+  git tag -a "$tag" -m "$tmsg"
+  success "Tag annoté '${tag}' créé."
+
+  info "Push du tag vers origin..."
+  git push origin "$tag"
+
+  echo ""
+  success "✅ Release '${tag}' publiée — GitHub Actions va compiler et créer la release."
+}
+
 # ── Menu interactif ───────────────────────────────────────────────────────────
 main_menu() {
   while true; do
@@ -385,11 +435,12 @@ main_menu() {
 
     echo -e "  ${BOLD}1${RESET}  Commit + Push            ${CYAN}← équivalent à ./git.sh \"msg\"${RESET}"
     echo -e "  ${BOLD}2${RESET}  Créer & pusher un tag"
-    echo -e "  ${BOLD}3${RESET}  Pull / Synchroniser"
-    echo -e "  ${BOLD}4${RESET}  Branches"
-    echo -e "  ${BOLD}5${RESET}  Stash"
-    echo -e "  ${BOLD}6${RESET}  Historique (log)"
-    echo -e "  ${BOLD}7${RESET}  Status"
+    echo -e "  ${BOLD}3${RESET}  ${GREEN}Release${RESET} ${GREEN}(commit + push + tag → déclenche GitHub Actions)${RESET}"
+    echo -e "  ${BOLD}4${RESET}  Pull / Synchroniser"
+    echo -e "  ${BOLD}5${RESET}  Branches"
+    echo -e "  ${BOLD}6${RESET}  Stash"
+    echo -e "  ${BOLD}7${RESET}  Historique (log)"
+    echo -e "  ${BOLD}8${RESET}  Status"
     echo -e "  ${BOLD}0${RESET}  Initialiser un nouveau dépôt"
     echo -e "  ${BOLD}r${RESET}  ${RED}Reset total${RESET} ${RED}(efface l'historique, garde les fichiers)${RESET}"
     echo -e "  ${BOLD}f${RESET}  ${YELLOW}Purger un fichier trop gros${RESET} ${YELLOW}(fichier >100MB rejeté par GitHub)${RESET}"
@@ -400,17 +451,18 @@ main_menu() {
     read -rp "$(echo -e "${YELLOW}➜ ${RESET}Choix : ")" choice
 
     case "$choice" in
-      1|2|3|4|5|6|7|r|R|f|F) require_git ;;
+      1|2|3|4|5|6|7|8|r|R|f|F) require_git ;;
     esac
 
     case "$choice" in
       1) commit_and_push "" ;;
       2) do_tag ;;
-      3) do_pull ;;
-      4) do_branch ;;
-      5) do_stash ;;
-      6) do_log ;;
-      7) do_status ;;
+      3) do_release ;;
+      4) do_pull ;;
+      5) do_branch ;;
+      6) do_stash ;;
+      7) do_log ;;
+      8) do_status ;;
       0) do_init ;;
       r|R) do_full_reset ;;
       f|F) do_purge_large_file ;;

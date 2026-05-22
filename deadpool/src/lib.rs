@@ -66,15 +66,33 @@ impl Pool {
         }
     }
 
-    pub fn extend_from_lowercase(&mut self) { self.extend_with_charset(DEFAULT_CHARSETS.lowercase); }
-    pub fn extend_from_uppercase(&mut self) { self.extend_with_charset(DEFAULT_CHARSETS.uppercase); }
-    pub fn extend_from_digits(&mut self) { self.extend_with_charset(DEFAULT_CHARSETS.digits); }
-    pub fn extend_from_braces(&mut self) { self.extend_with_charset(DEFAULT_CHARSETS.braces); }
-    pub fn extend_from_punctuation(&mut self) { self.extend_with_charset(DEFAULT_CHARSETS.punctuation); }
-    pub fn extend_from_quotes(&mut self) { self.extend_with_charset(DEFAULT_CHARSETS.quotes); }
-    pub fn extend_from_dashes(&mut self) { self.extend_with_charset(DEFAULT_CHARSETS.dashes); }
-    pub fn extend_from_math(&mut self) { self.extend_with_charset(DEFAULT_CHARSETS.math); }
-    pub fn extend_from_logograms(&mut self) { self.extend_with_charset(DEFAULT_CHARSETS.logograms); }
+    pub fn extend_from_lowercase(&mut self) {
+        self.extend_with_charset(DEFAULT_CHARSETS.lowercase);
+    }
+    pub fn extend_from_uppercase(&mut self) {
+        self.extend_with_charset(DEFAULT_CHARSETS.uppercase);
+    }
+    pub fn extend_from_digits(&mut self) {
+        self.extend_with_charset(DEFAULT_CHARSETS.digits);
+    }
+    pub fn extend_from_braces(&mut self) {
+        self.extend_with_charset(DEFAULT_CHARSETS.braces);
+    }
+    pub fn extend_from_punctuation(&mut self) {
+        self.extend_with_charset(DEFAULT_CHARSETS.punctuation);
+    }
+    pub fn extend_from_quotes(&mut self) {
+        self.extend_with_charset(DEFAULT_CHARSETS.quotes);
+    }
+    pub fn extend_from_dashes(&mut self) {
+        self.extend_with_charset(DEFAULT_CHARSETS.dashes);
+    }
+    pub fn extend_from_math(&mut self) {
+        self.extend_with_charset(DEFAULT_CHARSETS.math);
+    }
+    pub fn extend_from_logograms(&mut self) {
+        self.extend_with_charset(DEFAULT_CHARSETS.logograms);
+    }
 
     /// Sets the excluded characters for the pool.
     pub fn exclude_chars(&mut self, excluded: &str) {
@@ -86,11 +104,14 @@ impl Pool {
         let mut rng = Hc128Rng::from_os_rng();
         let excluded_chars = self.excluded_chars.as_deref().unwrap_or("");
 
-        let available: Vec<char> = self.characters.chars()
+        let available: Vec<char> = self
+            .characters
+            .chars()
             .filter(|c| !excluded_chars.contains(*c))
             .collect();
 
-        let extended_string: Result<String, PasswordError> = custom_string.chars()
+        let extended_string: Result<String, PasswordError> = custom_string
+            .chars()
             .map(|ch| {
                 if excluded_chars.contains(ch) {
                     if available.is_empty() {
@@ -124,10 +145,12 @@ impl Pool {
         let excluded_chars = self.excluded_chars.as_deref().unwrap_or("");
 
         // Each selected set contributes one mandatory character; custom string adds one more.
-        let min_length = self.selected_sets.len()
-            + self.custom_string.as_ref().map_or(0, |_| 1);
+        let min_length = self.selected_sets.len() + self.custom_string.as_ref().map_or(0, |_| 1);
         if length < min_length {
-            return Err(PasswordError::LengthTooShort { requested: length, minimum: min_length });
+            return Err(PasswordError::LengthTooShort {
+                requested: length,
+                minimum: min_length,
+            });
         }
 
         let mut rng = Hc128Rng::from_os_rng();
@@ -135,7 +158,8 @@ impl Pool {
 
         // Guarantee at least one character from each selected set.
         for set in &self.selected_sets {
-            let filtered: Vec<char> = set.chars()
+            let filtered: Vec<char> = set
+                .chars()
                 .filter(|c| !excluded_chars.contains(*c))
                 .collect();
             if filtered.is_empty() {
@@ -146,7 +170,8 @@ impl Pool {
 
         // Guarantee at least one character from the custom string.
         if let Some(custom_string) = &self.custom_string {
-            let filtered: Vec<char> = custom_string.chars()
+            let filtered: Vec<char> = custom_string
+                .chars()
                 .filter(|c| !excluded_chars.contains(*c))
                 .collect();
             if !filtered.is_empty() {
@@ -155,7 +180,9 @@ impl Pool {
         }
 
         // Pre-calculate once before the fill loop — avoids O(n²) recomputation.
-        let filtered_chars: Vec<char> = self.characters.chars()
+        let filtered_chars: Vec<char> = self
+            .characters
+            .chars()
             .filter(|c| !excluded_chars.contains(*c))
             .collect();
         if filtered_chars.is_empty() {

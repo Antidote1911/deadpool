@@ -64,8 +64,16 @@ pub struct Cli {
 
 impl Cli {
     pub fn validate(&mut self) -> Result<(), String> {
-        if !self.uppercase && !self.lowercase && !self.digits && !self.braces && !self.punctuation && !self.quotes && !self.dashes && !self.math && !self.logograms{
-        }
+        if !self.uppercase
+            && !self.lowercase
+            && !self.digits
+            && !self.braces
+            && !self.punctuation
+            && !self.quotes
+            && !self.dashes
+            && !self.math
+            && !self.logograms
+        {}
 
         Ok(())
     }

@@ -1,6 +1,6 @@
 [package]
 name = "deadpool"
-version = "1.5.0"
+version.workspace = true
 edition = "2021"
 authors = ["Fabrice Corraire <antidote1911@gmail.com>"]
 description = "🔑 random password generator crate"
@@ -10,6 +10,9 @@ readme = "README.md"
 keywords = ["password", "generator", "security"]
 categories = ["command-line-utilities", "command-line-interface"]
 license = "MIT"
+
+[lints]
+workspace = true
 
 [dependencies]
 rand = "0.9.0"

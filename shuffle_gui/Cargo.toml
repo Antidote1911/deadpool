@@ -1,7 +1,10 @@
 [package]
 name = "shuffle_gui"
-version = "1.5.0"
+version.workspace = true
 edition = "2021"
+
+[lints]
+workspace = true
 
 [dependencies]
 egui = "0.31.1"  # Check for the latest version

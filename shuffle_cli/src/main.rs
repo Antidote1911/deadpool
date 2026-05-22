@@ -1,17 +1,16 @@
 use std::io::Write;
 extern crate core;
 
-use std::fs::OpenOptions;
 use crate::cli::Cli;
+use std::fs::OpenOptions;
 
+use anyhow::{Context, Result};
 use clap::Parser;
 use deadpool::*;
-use anyhow::{Context, Result};
 
 pub mod cli;
 
 fn main() -> Result<()> {
-
     #[cfg(windows)]
     enable_ansi_support::enable_ansi_support()
         .context("Unable to enable ANSI support on Windows")?;
@@ -65,18 +64,35 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-
 /// Configures the pool based on CLI options.
 fn configure_pool(pool: &mut Pool, cli: &Cli) -> Result<()> {
-    if cli.uppercase { pool.extend_from_uppercase(); }
-    if cli.lowercase { pool.extend_from_lowercase(); }
-    if cli.digits { pool.extend_from_digits(); }
-    if cli.braces { pool.extend_from_braces(); }
-    if cli.punctuation { pool.extend_from_punctuation(); }
-    if cli.quotes { pool.extend_from_quotes(); }
-    if cli.dashes { pool.extend_from_dashes(); }
-    if cli.math { pool.extend_from_math(); }
-    if cli.logograms { pool.extend_from_logograms(); }
+    if cli.uppercase {
+        pool.extend_from_uppercase();
+    }
+    if cli.lowercase {
+        pool.extend_from_lowercase();
+    }
+    if cli.digits {
+        pool.extend_from_digits();
+    }
+    if cli.braces {
+        pool.extend_from_braces();
+    }
+    if cli.punctuation {
+        pool.extend_from_punctuation();
+    }
+    if cli.quotes {
+        pool.extend_from_quotes();
+    }
+    if cli.dashes {
+        pool.extend_from_dashes();
+    }
+    if cli.math {
+        pool.extend_from_math();
+    }
+    if cli.logograms {
+        pool.extend_from_logograms();
+    }
 
     if let Some(include) = cli.include() {
         pool.extend_from_string(&include)?;

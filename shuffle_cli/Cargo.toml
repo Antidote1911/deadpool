@@ -1,6 +1,6 @@
 [package]
 name = "shuffle"
-version = "1.5.0"
+version.workspace = true
 authors = ["Antidote1911 <antidote1911@gmail.com>"]
 license = "MIT"
 description = "🔑 Random password generator"
@@ -12,6 +12,9 @@ readme = "README.md"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lints]
+workspace = true
 
 [dependencies]
 clap = { version = "4.5.35", features = ["derive", "cargo"] }

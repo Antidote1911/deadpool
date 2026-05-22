@@ -52,7 +52,9 @@ mod tests {
         assert!(password.is_ok());
         let password = password.unwrap();
         assert_eq!(password.len(), 10);
-        assert!(password.chars().all(|ch| !pool.excluded_chars.as_ref().unwrap().contains(ch)));
+        assert!(password
+            .chars()
+            .all(|ch| !pool.excluded_chars.as_ref().unwrap().contains(ch)));
     }
 
     #[test]
