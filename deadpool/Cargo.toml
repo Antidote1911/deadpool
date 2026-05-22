@@ -13,11 +13,8 @@ license = "MIT"
 
 [dependencies]
 rand = "0.9.0"
-rand_seeder = "0.4.0"
-rand_isaac = "0.4.0"
 rand_hc = "0.4.0"
 thiserror = "2.0.12"
-unicode-segmentation = "1.12.0"
 
 [lib]
 name="deadpool"

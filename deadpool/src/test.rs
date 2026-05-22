@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-      use crate::*;
+    use crate::*;
 
     #[test]
     fn test_generate_valid_password() {
@@ -61,7 +61,7 @@ mod tests {
         pool.extend_from_lowercase();
         pool.extend_from_digits();
         pool.exclude_chars("aeiou");
-        pool.extend_from_string("hello123");
+        pool.extend_from_string("hello123").unwrap();
 
         let password = pool.generate(10);
         assert!(password.is_ok());
@@ -71,13 +71,36 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "No available characters to replace excluded ones.")]
     fn test_generate_with_only_excluded_characters() {
         let mut pool = Pool::new();
         pool.extend_from_lowercase();
         pool.exclude_chars("abcdefghijklmnopqrstuvwxyz");
-        // This will trigger a panic since no characters are left to generate a password.
-        pool.extend_from_string("test");
+        let result = pool.extend_from_string("test");
+        assert!(matches!(result, Err(PasswordError::NoAvailableCharacters)));
     }
 
+    #[test]
+    fn test_no_duplicate_sets() {
+        let mut pool = Pool::new();
+        pool.extend_from_lowercase();
+        pool.extend_from_lowercase(); // duplicate — should be ignored
+        assert_eq!(pool.selected_sets.len(), 1);
+        assert_eq!(pool.characters.len(), DEFAULT_CHARSETS.lowercase.len());
+    }
+
+    #[test]
+    fn test_length_too_short() {
+        let mut pool = Pool::new();
+        pool.extend_from_lowercase();
+        pool.extend_from_uppercase();
+        pool.extend_from_digits(); // 3 sets → minimum length = 3
+        let result = pool.generate(2);
+        assert!(matches!(result, Err(PasswordError::LengthTooShort { .. })));
+    }
+
+    #[test]
+    fn test_default_pool_is_empty() {
+        let pool = Pool::default();
+        assert!(pool.is_empty());
+    }
 }

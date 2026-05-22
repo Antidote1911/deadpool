@@ -131,3 +131,10 @@ StyleCopReport.xml
 *.pidb
 *.svclog
 *.scc
+target/
+node_modules/
+.env
+dist/
+__pycache__/
+.claude/
+.idea/

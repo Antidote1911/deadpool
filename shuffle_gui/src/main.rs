@@ -1,90 +1,165 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use eframe::egui;
-use password_generator::ComplexPasswordGenerator;
-mod password_generator;
+use deadpool::Pool;
+
+const ACCENT:            egui::Color32 = egui::Color32::from_rgb(255, 160, 47);
+const BTN_INACTIVE:      egui::Color32 = egui::Color32::from_rgb(65,  65,  65);
+const BTN_INACTIVE_TEXT: egui::Color32 = egui::Color32::from_rgb(177, 177, 177);
+const BTN_ACTIVE_TEXT:   egui::Color32 = egui::Color32::from_rgb(24,  24,  24);
+const ERROR_COLOR:       egui::Color32 = egui::Color32::from_rgb(255, 100, 100);
 
 struct AppState {
-    password_length: usize,
-    include_uppercase: bool,
-    include_lowercase: bool,
-    include_numbers: bool,
-    include_symbols: bool,
-    num_passwords: usize,
-    generated_passwords: Vec<String>,
-    password_generator: Box<ComplexPasswordGenerator>,
-    copied_password: Option<String>,
-    all_passwords_copied: bool,
+    password_length:  usize,
+    use_uppercase:    bool,
+    use_lowercase:    bool,
+    use_digits:       bool,
+    use_braces:       bool,
+    use_punctuation:  bool,
+    use_quotes:       bool,
+    use_dashes:       bool,
+    use_math:         bool,
+    use_logograms:    bool,
+    include_chars:    String,
+    exclude_chars:    String,
+    num_passwords:    usize,
+    generated:        Vec<String>,
+    error_message:    Option<String>,
+    copied_password:  Option<String>,
+    all_copied:       bool,
 }
 
 impl AppState {
     fn new() -> Self {
-        Self {
-            password_length: 12,
-            include_uppercase: true,
-            include_lowercase: true,
-            include_numbers: false,
-            include_symbols: false,
-            num_passwords: 1,
-            generated_passwords: Vec::new(),
-            password_generator: Box::new(ComplexPasswordGenerator::new(true, true, false, false)),
+        let mut s = Self {
+            password_length: 20,
+            use_uppercase:   true,
+            use_lowercase:   true,
+            use_digits:      true,
+            use_braces:      false,
+            use_punctuation: false,
+            use_quotes:      false,
+            use_dashes:      false,
+            use_math:        false,
+            use_logograms:   false,
+            include_chars:   String::new(),
+            exclude_chars:   String::new(),
+            num_passwords:   1,
+            generated:       Vec::new(),
+            error_message:   None,
             copied_password: None,
-            all_passwords_copied: false,
+            all_copied:      false,
+        };
+        s.regenerate();
+        s
+    }
+
+    fn has_any_set(&self) -> bool {
+        self.use_uppercase || self.use_lowercase || self.use_digits
+            || self.use_braces  || self.use_punctuation || self.use_quotes
+            || self.use_dashes  || self.use_math         || self.use_logograms
+            || !self.include_chars.is_empty()
+    }
+
+    fn regenerate(&mut self) {
+        if !self.has_any_set() {
+            self.error_message = Some("Select at least one character group.".into());
+            self.generated.clear();
+            return;
         }
-    }
 
-    fn update_generator(&mut self) {
-        self.password_generator = Box::new(ComplexPasswordGenerator::new(
-            self.include_uppercase,
-            self.include_lowercase,
-            self.include_numbers,
-            self.include_symbols,
-        ));
-    }
+        let mut pool = Pool::new();
+        if self.use_uppercase   { pool.extend_from_uppercase(); }
+        if self.use_lowercase   { pool.extend_from_lowercase(); }
+        if self.use_digits      { pool.extend_from_digits(); }
+        if self.use_braces      { pool.extend_from_braces(); }
+        if self.use_punctuation { pool.extend_from_punctuation(); }
+        if self.use_quotes      { pool.extend_from_quotes(); }
+        if self.use_dashes      { pool.extend_from_dashes(); }
+        if self.use_math        { pool.extend_from_math(); }
+        if self.use_logograms   { pool.extend_from_logograms(); }
 
-    fn is_generation_enabled(&self) -> bool {
-        self.include_uppercase || self.include_lowercase || self.include_numbers || self.include_symbols
+        // extend_from_string must run before exclude_chars so that custom chars
+        // are added as-is; generate() then filters excluded ones at draw time.
+        if !self.include_chars.is_empty() {
+            if let Err(e) = pool.extend_from_string(&self.include_chars) {
+                self.error_message = Some(e.to_string());
+                self.generated.clear();
+                return;
+            }
+        }
+        if !self.exclude_chars.is_empty() {
+            pool.exclude_chars(&self.exclude_chars);
+        }
+
+        // Auto-clamp length so it never falls below the mandatory minimum.
+        let min_len = [
+            self.use_uppercase, self.use_lowercase, self.use_digits,
+            self.use_braces,    self.use_punctuation, self.use_quotes,
+            self.use_dashes,    self.use_math,         self.use_logograms,
+        ].iter().filter(|&&b| b).count()
+            + usize::from(!self.include_chars.is_empty());
+
+        if self.password_length < min_len {
+            self.password_length = min_len;
+        }
+
+        self.error_message   = None;
+        self.all_copied      = false;
+        self.copied_password = None;
+        self.generated = (0..self.num_passwords)
+            .filter_map(|_| pool.generate(self.password_length).ok())
+            .collect();
     }
 }
 
+// Helper: renders a fixed-size toggle button; returns true when the state flipped.
+fn toggle_btn(ui: &mut egui::Ui, label: &str, state: &mut bool, width: f32) -> bool {
+    let (fill, text_color) = if *state {
+        (ACCENT, BTN_ACTIVE_TEXT)
+    } else {
+        (BTN_INACTIVE, BTN_INACTIVE_TEXT)
+    };
+    let btn = egui::Button::new(egui::RichText::new(label).color(text_color).size(13.5))
+        .fill(fill)
+        .stroke(egui::Stroke::new(1.0, egui::Color32::from_rgb(30, 30, 30)))
+        .corner_radius(5.0);
+    let clicked = ui.add_sized([width, 30.0], btn).clicked();
+    if clicked { *state = !*state; }
+    clicked
+}
+
 fn main() -> eframe::Result {
-    let icon = include_bytes!("../resources/icon.png");
+    let icon  = include_bytes!("../resources/icon.png");
     let image = image::load_from_memory(icon).expect("Failed to load icon");
-    let rgba = image.to_rgba8();
-    let (icon_width, icon_height) = rgba.dimensions();
+    let rgba  = image.to_rgba8();
+    let (w, h) = rgba.dimensions();
 
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_icon(egui::IconData {
-                rgba: rgba.into_raw(),
-                width: icon_width,
-                height: icon_height,
-            })
-            .with_inner_size([450.0, 400.0])
-            .with_min_inner_size([380.0, 300.0])
-            .with_max_inner_size([700.0, 1100.0]),
+            .with_icon(egui::IconData { rgba: rgba.into_raw(), width: w, height: h })
+            .with_inner_size([600.0, 660.0])
+            .with_min_inner_size([520.0, 540.0]),
         ..Default::default()
     };
 
     eframe::run_native(
-        "Password Generator",
+        "Strong Password Generator",
         options,
         Box::new(|cc| {
+            cc.egui_ctx.set_visuals(egui::Visuals::dark());
+
             let mut style = (*cc.egui_ctx.style()).clone();
-
-            style.visuals.widgets.noninteractive.fg_stroke.width = 2.0; 
-            style.visuals.widgets.inactive.fg_stroke.width = 2.0; 
-            style.spacing.icon_width = 20.0; 
-
+            style.visuals.panel_fill  = egui::Color32::from_rgb(50, 50, 50);
+            style.visuals.window_fill = egui::Color32::from_rgb(50, 50, 50);
+            style.spacing.icon_width  = 18.0;
             style.text_styles = [
-                (egui::TextStyle::Heading, egui::FontId::new(30.0, egui::FontFamily::Proportional)),
-                (egui::TextStyle::Body, egui::FontId::new(20.0, egui::FontFamily::Proportional)),
-                (egui::TextStyle::Monospace, egui::FontId::new(20.0, egui::FontFamily::Monospace)),
-                (egui::TextStyle::Button, egui::FontId::new(20.0, egui::FontFamily::Proportional)),
-                (egui::TextStyle::Small, egui::FontId::new(15.0, egui::FontFamily::Proportional)),
-            ]
-            .into();
-
+                (egui::TextStyle::Heading,   egui::FontId::new(22.0, egui::FontFamily::Proportional)),
+                (egui::TextStyle::Body,      egui::FontId::new(16.0, egui::FontFamily::Proportional)),
+                (egui::TextStyle::Monospace, egui::FontId::new(16.0, egui::FontFamily::Monospace)),
+                (egui::TextStyle::Button,    egui::FontId::new(15.0, egui::FontFamily::Proportional)),
+                (egui::TextStyle::Small,     egui::FontId::new(13.0, egui::FontFamily::Proportional)),
+            ].into();
             cc.egui_ctx.set_style(style);
 
             Ok(Box::new(AppState::new()))
@@ -92,117 +167,167 @@ fn main() -> eframe::Result {
     )
 }
 
-const PRIMARY_COLOR: egui::Color32 = egui::Color32::from_rgb(225, 225, 225);
-
 impl eframe::App for AppState {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        
+        let mut changed = false;
+
         egui::CentralPanel::default().show(ctx, |ui| {
-            egui::CollapsingHeader::new("Settings")
-            .default_open(true)
-            .show(ui, |ui| {
-                egui::Grid::new("settings_grid")
-                    .num_columns(2)
-                    .spacing(egui::Vec2::new(10.0, 10.0))
-                    .show(ui, |ui| {
-                        ui.label("Password Length:");
-                        ui.add(egui::Slider::new(&mut self.password_length, 4..=20));
-                        ui.end_row();
+            ui.add_space(4.0);
+            ui.heading("🔑 Strong Password Generator");
+            ui.separator();
 
-                        ui.label("Include Uppercase:");
-                        ui.add(egui::Checkbox::without_text(&mut self.include_uppercase));
-                        ui.end_row();
-
-                        ui.label("Include Lowercase:");
-                        ui.add(egui::Checkbox::without_text(&mut self.include_lowercase));
-                        ui.end_row();
-
-                        ui.label("Include Numbers:");
-                        ui.add(egui::Checkbox::without_text(&mut self.include_numbers));
-                        ui.end_row();
-
-                        ui.label("Include Symbols:");
-                        ui.add(egui::Checkbox::without_text(&mut self.include_symbols));
-                        ui.end_row();
-
-                        ui.label("Number of Passwords:");
-                        ui.add(egui::Slider::new(&mut self.num_passwords, 1..=50));
-                        ui.end_row();
-                    });
+            // ── Character-set toggle buttons ─────────────────────────────────
+            // Row 1 — 5 columns
+            let gap = 4.0;
+            ui.horizontal(|ui| {
+                ui.spacing_mut().item_spacing.x = gap;
+                let w = (ui.available_width() - gap * 4.0) / 5.0;
+                changed |= toggle_btn(ui, "A-Z",       &mut self.use_uppercase,   w);
+                changed |= toggle_btn(ui, "a-z",       &mut self.use_lowercase,   w);
+                changed |= toggle_btn(ui, "0-9",       &mut self.use_digits,      w);
+                changed |= toggle_btn(ui, "#$%&@^`~",  &mut self.use_logograms,   w);
+                changed |= toggle_btn(ui, "<>*+!?=",   &mut self.use_math,        w);
             });
-
+            ui.add_space(gap);
+            // Row 2 — 4 active + 1 empty placeholder to keep alignment
+            ui.horizontal(|ui| {
+                ui.spacing_mut().item_spacing.x = gap;
+                let w = (ui.available_width() - gap * 4.0) / 5.0;
+                changed |= toggle_btn(ui, ".,:;",       &mut self.use_punctuation, w);
+                changed |= toggle_btn(ui, "\" '",       &mut self.use_quotes,      w);
+                changed |= toggle_btn(ui, r"\ / | _ -", &mut self.use_dashes,      w);
+                changed |= toggle_btn(ui, "{ [ ( ) ] }", &mut self.use_braces,     w);
+                // intentionally empty — slot reserved for a future set
+                ui.allocate_space(egui::Vec2::new(w, 30.0));
+            });
 
             ui.separator();
 
+            // ── Password length ───────────────────────────────────────────────
             ui.horizontal(|ui| {
-                egui::Grid::new("button_grid")
-                    .num_columns(2)
-                    .spacing(egui::Vec2::new(10.0, 10.0))
-                    .show(ui, |ui| {
-                        let generate_passwords_button = egui::Button::new(
-                            egui::RichText::new("🔄 Generate Passwords")
-                                .color(egui::Color32::from_rgb(24, 24, 27))
-                        )
-                        .fill(PRIMARY_COLOR)
-                        .corner_radius(6.0);
+                ui.label("Length:");
+                changed |= ui.add(
+                    egui::Slider::new(&mut self.password_length, 1..=200).show_value(true)
+                ).changed();
+            });
 
-                        if ui.add_enabled(self.is_generation_enabled(), generate_passwords_button).clicked() {
-                            self.all_passwords_copied = false;
-                            self.update_generator();
-                            self.generated_passwords = (0..self.num_passwords)
-                                .map(|_| self.password_generator.generate_password(self.password_length))
-                                .collect();
+            ui.separator();
+
+            // ── Include / Exclude ─────────────────────────────────────────────
+            egui::Grid::new("fields_grid")
+                .num_columns(2)
+                .spacing([8.0, 5.0])
+                .show(ui, |ui| {
+                    ui.label("Also include:");
+                    changed |= ui.add(
+                        egui::TextEdit::singleline(&mut self.include_chars)
+                            .hint_text("extra characters to include")
+                            .desired_width(f32::INFINITY)
+                    ).changed();
+                    ui.end_row();
+
+                    ui.label("Do not include:");
+                    ui.horizontal(|ui| {
+                        changed |= ui.add(
+                            egui::TextEdit::singleline(&mut self.exclude_chars)
+                                .hint_text("characters to exclude")
+                                .desired_width(ui.available_width() - 115.0)
+                        ).changed();
+
+                        let lookalike_btn = egui::Button::new("Add Look-alike")
+                            .fill(BTN_INACTIVE)
+                            .stroke(egui::Stroke::new(1.0, egui::Color32::from_rgb(90, 90, 90)))
+                            .corner_radius(5.0);
+                        if ui.add(lookalike_btn)
+                            .on_hover_text("Exclude characters that look similar: l B G I O 0 1 6 8 o | .")
+                            .clicked()
+                        {
+                            for ch in "lBGIO0168o|.".chars() {
+                                if !self.exclude_chars.contains(ch) {
+                                    self.exclude_chars.push(ch);
+                                }
+                            }
+                            changed = true;
                         }
-
-                        let copy_all_passwords_button = egui::Button::new(
-                            egui::RichText::new("📋 Copy All Passwords")
-                                .color(egui::Color32::from_rgb(205, 205, 205))
-                        )
-                        .fill(egui::Color32::from_rgb(39, 39, 42))
-                        .stroke(egui::Stroke::new(1.0, egui::Color32::from_rgb(63, 63, 70)))
-                        .corner_radius(6.0);
-
-                        if ui.add_enabled(!self.generated_passwords.is_empty(), copy_all_passwords_button).clicked() {
-                            let all_passwords = self.generated_passwords.join("\n");
-                            ui.ctx().copy_text(all_passwords);
-                            self.all_passwords_copied = true;
-                        }
-            
                     });
-            });
+                    ui.end_row();
+                });
 
+            ui.separator();
+
+            // ── Number of passwords ───────────────────────────────────────────
             ui.horizontal(|ui| {
-                ui.label(
-                    egui::RichText::new("ℹ Scroll and right-click on a password to copy it")
-                        .size(14.0)
-                        .color(egui::Color32::from_rgb(150, 150, 150))
-                );
+                ui.label("Number of passwords:");
+                changed |= ui.add(
+                    egui::Slider::new(&mut self.num_passwords, 1..=50).show_value(true)
+                ).changed();
             });
 
-            if !self.generated_passwords.is_empty() {
-                ui.separator();
+            ui.separator();
+
+            // ── Action buttons ────────────────────────────────────────────────
+            ui.horizontal(|ui| {
+                let gen_btn = egui::Button::new(
+                    egui::RichText::new("🔄 Generate Passwords").color(egui::Color32::from_rgb(24, 24, 24))
+                )
+                .fill(ACCENT)
+                .corner_radius(6.0);
+                if ui.add_enabled(self.has_any_set(), gen_btn).clicked() {
+                    self.regenerate();
+                }
+
+                let copy_btn = egui::Button::new(
+                    egui::RichText::new("📋 Copy All").color(BTN_INACTIVE_TEXT)
+                )
+                .fill(BTN_INACTIVE)
+                .stroke(egui::Stroke::new(1.0, egui::Color32::from_rgb(90, 90, 90)))
+                .corner_radius(6.0);
+                if ui.add_enabled(!self.generated.is_empty(), copy_btn).clicked() {
+                    ui.ctx().copy_text(self.generated.join("\n"));
+                    self.all_copied = true;
+                }
+            });
+
+            // ── Status line ───────────────────────────────────────────────────
+            if let Some(err) = &self.error_message {
+                ui.label(
+                    egui::RichText::new(format!("⚠  {err}"))
+                        .color(ERROR_COLOR)
+                        .size(13.0)
+                );
+            } else if !self.generated.is_empty() {
+                ui.label(
+                    egui::RichText::new("ℹ  Click a password to copy it")
+                        .color(egui::Color32::from_rgb(130, 130, 130))
+                        .size(13.0)
+                );
+            }
+
+            // ── Password list ─────────────────────────────────────────────────
+            if !self.generated.is_empty() {
                 egui::Frame::group(ui.style())
-                    .inner_margin(egui::Margin::same(10))
+                    .inner_margin(egui::Margin::same(8))
                     .show(ui, |ui| {
                         egui::ScrollArea::vertical()
                             .auto_shrink(false)
                             .show(ui, |ui| {
                                 ui.with_layout(
-                                    egui::Layout::top_down(egui::Align::LEFT).with_cross_justify(true),
+                                    egui::Layout::top_down(egui::Align::LEFT)
+                                        .with_cross_justify(true),
                                     |ui| {
-                                        for password in &self.generated_passwords {
+                                        for password in &self.generated {
                                             ui.horizontal(|ui| {
                                                 ui.set_width(ui.available_width());
-                                                let response = ui.monospace(password);
-                                                
-                                                if response.clicked() {
+                                                let resp = ui.monospace(password);
+                                                if resp.clicked() {
                                                     ui.ctx().copy_text(password.clone());
                                                     self.copied_password = Some(password.clone());
-                                                    self.all_passwords_copied = false;
+                                                    self.all_copied = false;
                                                 }
-
-                                                if self.all_passwords_copied || Some(password) == self.copied_password.as_ref() {
-                                                    ui.label(egui::RichText::new("✅").color(PRIMARY_COLOR));
+                                                if self.all_copied
+                                                    || Some(password) == self.copied_password.as_ref()
+                                                {
+                                                    ui.label(egui::RichText::new("✅").color(ACCENT));
                                                 }
                                             });
                                         }
@@ -212,5 +337,10 @@ impl eframe::App for AppState {
                     });
             }
         });
+
+        // Auto-regenerate when any setting changed (mirrors Qt behaviour).
+        if changed {
+            self.regenerate();
+        }
     }
 }

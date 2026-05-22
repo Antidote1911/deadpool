@@ -21,7 +21,7 @@ fn main() -> Result<()> {
     cli.validate().unwrap();
 
     let mut pool = Pool::new();
-    configure_pool(&mut pool, &cli);
+    configure_pool(&mut pool, &cli)?;
 
     if pool.is_empty() {
         pool.extend_from_lowercase();
@@ -67,8 +67,7 @@ fn main() -> Result<()> {
 
 
 /// Configures the pool based on CLI options.
-fn configure_pool(pool: &mut Pool, cli: &Cli) {
-    // Extend pool based on CLI flags
+fn configure_pool(pool: &mut Pool, cli: &Cli) -> Result<()> {
     if cli.uppercase { pool.extend_from_uppercase(); }
     if cli.lowercase { pool.extend_from_lowercase(); }
     if cli.digits { pool.extend_from_digits(); }
@@ -79,11 +78,11 @@ fn configure_pool(pool: &mut Pool, cli: &Cli) {
     if cli.math { pool.extend_from_math(); }
     if cli.logograms { pool.extend_from_logograms(); }
 
-    // Apply exclusions and inclusions
+    if let Some(include) = cli.include() {
+        pool.extend_from_string(&include)?;
+    }
     if let Some(exclude) = cli.exclude() {
         pool.exclude_chars(&exclude);
     }
-    if let Some(include) = cli.include() {
-        pool.extend_from_string(&include);
-    }
+    Ok(())
 }

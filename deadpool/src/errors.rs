@@ -7,6 +7,8 @@ pub enum PasswordError {
     ZeroLengthPassword,
     #[error("character pool must not be empty")]
     EmptyCharacterPool,
-    #[error("No available characters to replace excluded ones")]
+    #[error("no available characters to replace excluded ones")]
     NoAvailableCharacters,
+    #[error("requested length {requested} is less than the minimum required {minimum} (one character per selected set)")]
+    LengthTooShort { requested: usize, minimum: usize },
 }

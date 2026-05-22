@@ -50,7 +50,7 @@ pub extern "C" fn get_random(length: u8,
         pool.extend_from_logograms();
     }
 
-    pool.extend_from_string(c_to_rust_string(also).unwrap().as_str());
+    pool.extend_from_string(c_to_rust_string(also).unwrap().as_str()).unwrap();
     pool.exclude_chars(c_to_rust_string(avoid).unwrap().as_str());
 
     let password = pool.generate(length as usize).unwrap();
