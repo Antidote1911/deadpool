@@ -23,7 +23,7 @@ mod tests {
         if let Err(err) = result {
             match err {
                 PasswordError::EmptyCharacterPool => (),
-                _ => panic!("Unexpected error type: {:?}", err),
+                _ => panic!("Unexpected error type: {err:?}"),
             }
         }
     }
@@ -37,7 +37,7 @@ mod tests {
         if let Err(err) = result {
             match err {
                 PasswordError::ZeroLengthPassword => (),
-                _ => panic!("Unexpected error type: {:?}", err),
+                _ => panic!("Unexpected error type: {err:?}"),
             }
         }
     }

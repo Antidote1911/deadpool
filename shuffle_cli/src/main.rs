@@ -6,7 +6,7 @@ use std::fs::OpenOptions;
 
 use anyhow::{Context, Result};
 use clap::Parser;
-use deadpool::*;
+use deadpool::Pool;
 
 pub mod cli;
 
@@ -32,7 +32,6 @@ fn main() -> Result<()> {
         Some(
             OpenOptions::new()
                 .create(true)
-                .write(true)
                 .append(true)
                 .open(output_path)
                 .context("Unable to open or create output file")?,
@@ -49,15 +48,15 @@ fn main() -> Result<()> {
                 let generated_password = password.clone();
 
                 // Print the password
-                println!("{}", generated_password);
+                println!("{generated_password}");
 
                 // Write the password to the file if output is specified
                 if let Some(file) = output_file.as_mut() {
-                    writeln!(file, "{}", generated_password)
+                    writeln!(file, "{generated_password}")
                         .context("Unable to write password to file")?;
                 }
             }
-            Err(e) => eprintln!("Error generating password: {}", e),
+            Err(e) => eprintln!("Error generating password: {e}"),
         }
     }
 

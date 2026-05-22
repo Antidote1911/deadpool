@@ -40,7 +40,7 @@ mod tests {
         let expected_length = 24;
         for _ in 0..100 {
             cmd()
-                .args(&["-L", "24"])
+                .args(["-L", "24"])
                 .assert()
                 .stdout(predicate::function(|s: &str| {
                     s.trim().chars().count() == expected_length
@@ -63,7 +63,7 @@ mod tests {
         let length = 12;
         for _ in 0..30 {
             cmd()
-                .args(&["-L", "12", "--exclude", exclude_chars])
+                .args(["-L", "12", "--exclude", exclude_chars])
                 .assert()
                 .success()
                 .stdout(predicate::function(move |s: &str| {
@@ -77,7 +77,7 @@ mod tests {
     fn test_generate_multiple_passwords() {
         let count = 100;
         let output = cmd()
-            .args(&["-C", &count.to_string(), "-L", "12"])
+            .args(["-C", &count.to_string(), "-L", "12"])
             .assert()
             .success()
             .get_output()
@@ -103,7 +103,7 @@ mod tests {
 
         // Exécution de la commande
         let mut cmd = Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap();
-        cmd.args(&[
+        cmd.args([
             "--output",
             output_path.to_str().unwrap(),
             "-L",
@@ -119,8 +119,7 @@ mod tests {
         assert_eq!(
             output_content.trim().chars().count(),
             expected_length,
-            "Le contenu du fichier ne correspond pas à la longueur attendue. Contenu : '{}'",
-            output_content
+            "Le contenu du fichier ne correspond pas à la longueur attendue. Contenu : '{output_content}'"
         );
     }
 
@@ -132,7 +131,7 @@ mod tests {
 
         // Exécuter la commande avec les arguments spécifiés
         cmd()
-            .args(&["-L", &length.to_string(), "--include", include_chars]) // Arguments
+            .args(["-L", &length.to_string(), "--include", include_chars])
             .assert()
             .success()           // La commande ne doit pas échouer
             .stdout(predicate::function(move |s: &str| {
@@ -149,7 +148,7 @@ mod tests {
 
         let mut command = cmd();
         command
-            .args(&["-L", &length.to_string(), "--include", include_chars])
+            .args(["-L", &length.to_string(), "--include", include_chars])
             .assert()
             .success()
             .stdout(predicate::eq(expected_output)); // Vérifie que la sortie correspond exactement à ce qui est attendu
