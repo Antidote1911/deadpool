@@ -1,6 +1,6 @@
 # Maintainer: Antidote1911 <antidote1911@gmail.com>
 pkgname=deadpool
-pkgver=@PKGVER@
+pkgver=1.6.0
 pkgrel=1
 pkgdesc="Strong random password generator (CLI + GUI)"
 arch=('x86_64')
@@ -9,7 +9,7 @@ license=('MIT')
 depends=('gcc-libs' 'libxcb' 'libxkbcommon' 'fontconfig' 'mesa' 'gtk3')
 makedepends=('rust' 'pkg-config')
 source=("deadpool-${pkgver}.tar.gz::https://github.com/Antidote1911/deadpool/archive/refs/tags/v${pkgver}.tar.gz")
-sha256sums=('@SHA256@')
+sha256sums=('8203a3d5e3615a027a7a0ff85c23a3953ed29521cdaf083a9daccc9de314e8a8')
 
 prepare() {
   cd "deadpool-${pkgver}"
