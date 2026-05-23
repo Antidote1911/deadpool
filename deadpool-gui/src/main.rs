@@ -224,6 +224,7 @@ fn main() -> eframe::Result {
 
 impl eframe::App for AppState {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        ctx.set_visuals(egui::Visuals::dark());
         let mut changed = false;
 
         egui::CentralPanel::default().show(ctx, |ui| {

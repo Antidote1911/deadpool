@@ -1,6 +1,6 @@
 # Maintainer: Antidote1911 <antidote1911@gmail.com>
 pkgname=deadpool
-pkgver=1.6.2
+pkgver=1.6.3
 pkgrel=1
 pkgdesc="Strong random password generator (CLI + GUI)"
 arch=('x86_64')
