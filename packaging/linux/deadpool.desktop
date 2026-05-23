@@ -1,0 +1,8 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Deadpool Password Generator
+Exec=shuffle_gui
+Icon=deadpool
+Categories=Utility;Security;
+Comment=Strong password generator

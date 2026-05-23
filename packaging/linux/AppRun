@@ -1,0 +1,10 @@
+#!/bin/bash
+SELF=$(readlink -f "$0")
+HERE=${SELF%/*}
+export PATH="${HERE}/usr/bin:${PATH}"
+export LD_LIBRARY_PATH="${HERE}/usr/lib:${LD_LIBRARY_PATH}"
+if [ "${1}" = "--cli" ]; then
+  exec "${HERE}/usr/bin/shuffle" "${@:2}"
+else
+  exec "${HERE}/usr/bin/shuffle_gui" "$@"
+fi

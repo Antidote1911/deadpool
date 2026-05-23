@@ -1,0 +1,56 @@
+# Maintainer: Antidote1911 <antidote1911@gmail.com>
+pkgname=deadpool-git
+pkgver=r1.0000000
+pkgrel=1
+pkgdesc="Strong random password generator (CLI + GUI) — git"
+arch=('x86_64')
+url="https://github.com/Antidote1911/deadpool"
+license=('MIT')
+depends=('gcc-libs' 'libxcb' 'libxkbcommon' 'fontconfig' 'mesa' 'gtk3')
+makedepends=('rust' 'pkg-config' 'git')
+provides=('deadpool')
+conflicts=('deadpool')
+source=("${pkgname}::git+https://github.com/Antidote1911/deadpool.git")
+sha256sums=('SKIP')
+
+pkgver() {
+  cd "${pkgname}"
+  printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+prepare() {
+  cd "${pkgname}"
+  export RUSTUP_TOOLCHAIN=stable
+  cargo fetch --target "$(rustc -vV | sed -n 's/host: //p')"
+}
+
+build() {
+  cd "${pkgname}"
+  export RUSTUP_TOOLCHAIN=stable
+  export CARGO_TARGET_DIR=target
+  cargo build --release -p shuffle -p shuffle_gui
+}
+
+package() {
+  cd "${pkgname}"
+  install -Dm755 target/release/shuffle     "${pkgdir}/usr/bin/shuffle"
+  install -Dm755 target/release/shuffle_gui "${pkgdir}/usr/bin/shuffle_gui"
+  install -Dm644 shuffle_gui/resources/icon.png \
+    "${pkgdir}/usr/share/icons/hicolor/256x256/apps/deadpool.png"
+
+  install -d "${pkgdir}/usr/share/applications"
+  cat > "${pkgdir}/usr/share/applications/deadpool.desktop" << 'EOF'
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Deadpool Password Generator
+Exec=shuffle_gui
+Icon=deadpool
+Categories=Utility;Security;
+Comment=Strong password generator
+EOF
+  chmod 644 "${pkgdir}/usr/share/applications/deadpool.desktop"
+
+  install -Dm644 LICENSE-MIT "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+  install -Dm644 README.md   "${pkgdir}/usr/share/doc/${pkgname}/README.md"
+}

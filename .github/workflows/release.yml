@@ -20,7 +20,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev \
-            libxkbcommon-dev libssl-dev libgtk-3-dev libfontconfig1-dev
+            libxkbcommon-dev libssl-dev libgtk-3-dev libfontconfig1-dev \
+            wget file curl
 
       - uses: dtolnay/rust-toolchain@stable
 
@@ -32,17 +33,71 @@ jobs:
       - name: Build shuffle GUI
         run: cargo build --release -p shuffle_gui
 
-      - name: Package
+      - name: Package tar.gz
         run: |
           mkdir -p dist
-          cp target/release/shuffle   dist/shuffle-linux-x86_64
+          cp target/release/shuffle     dist/shuffle-linux-x86_64
           cp target/release/shuffle_gui dist/shuffle_gui-linux-x86_64
           tar -czf shuffle-linux-x86_64.tar.gz -C dist .
+
+      - name: Build AppImage
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+
+          wget -q "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage"
+          wget -q "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+          chmod +x linuxdeploy-x86_64.AppImage appimagetool-x86_64.AppImage
+
+          # Build AppDir skeleton
+          mkdir -p AppDir/usr/bin
+          mkdir -p AppDir/usr/share/applications
+          mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
+
+          cp packaging/linux/deadpool.desktop \
+            AppDir/usr/share/applications/deadpool.desktop
+          cp shuffle_gui/resources/icon.png \
+            AppDir/usr/share/icons/hicolor/256x256/apps/deadpool.png
+
+          # Bundle both executables and their shared-library dependencies
+          APPIMAGE_EXTRACT_AND_RUN=1 ./linuxdeploy-x86_64.AppImage \
+            --appdir AppDir \
+            --executable target/release/shuffle \
+            --executable target/release/shuffle_gui \
+            --desktop-file AppDir/usr/share/applications/deadpool.desktop \
+            --icon-file shuffle_gui/resources/icon.png
+
+          # Replace the generated AppRun with our custom launcher:
+          # default → GUI, --cli flag → CLI
+          cp packaging/linux/AppRun AppDir/AppRun
+          chmod +x AppDir/AppRun
+
+          APPIMAGE_EXTRACT_AND_RUN=1 ./appimagetool-x86_64.AppImage \
+            AppDir "deadpool-${VERSION}-linux-x86_64.AppImage"
+
+      - name: Generate PKGBUILD files
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          SHA256=$(curl -fsSL \
+            "https://github.com/Antidote1911/deadpool/archive/refs/tags/${GITHUB_REF_NAME}.tar.gz" \
+            | sha256sum | awk '{print $1}')
+
+          mkdir -p pkgbuild_out
+
+          sed "s/@PKGVER@/${VERSION}/g; s/@SHA256@/${SHA256}/g" \
+            packaging/archlinux/PKGBUILD \
+            > pkgbuild_out/PKGBUILD
+
+          cp packaging/archlinux/PKGBUILD-git pkgbuild_out/PKGBUILD-git
+
+          tar -czf pkgbuild-archlinux.tar.gz -C pkgbuild_out .
 
       - uses: actions/upload-artifact@v4
         with:
           name: linux
-          path: shuffle-linux-x86_64.tar.gz
+          path: |
+            shuffle-linux-x86_64.tar.gz
+            deadpool-*-linux-x86_64.AppImage
+            pkgbuild-archlinux.tar.gz
 
   build-windows:
     name: Build Windows (x86_64)
@@ -60,7 +115,7 @@ jobs:
       - name: Build shuffle GUI
         run: cargo build --release -p shuffle_gui
 
-      - name: Package
+      - name: Package zip
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force dist
@@ -68,10 +123,34 @@ jobs:
           Copy-Item target\release\shuffle_gui.exe dist\shuffle_gui-windows-x86_64.exe
           Compress-Archive -Path dist\* -DestinationPath shuffle-windows-x86_64.zip
 
+      - name: Build Windows installer
+        shell: pwsh
+        run: |
+          $version = $env:GITHUB_REF_NAME -replace '^v', ''
+
+          # Convert the PNG icon to a multi-size ICO (ImageMagick is pre-installed)
+          magick "shuffle_gui\resources\icon.png" `
+            -define icon:auto-resize="256,128,64,48,32,16" icon.ico
+
+          # Stage all installer inputs in one directory
+          New-Item -ItemType Directory -Force installer_stage
+          Copy-Item target\release\shuffle.exe     installer_stage\shuffle.exe
+          Copy-Item target\release\shuffle_gui.exe installer_stage\shuffle_gui.exe
+          Copy-Item icon.ico                        installer_stage\icon.ico
+          Copy-Item packaging\windows\installer.iss installer_stage\installer.iss
+
+          # Compile — output lands in workspace root
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          & $iscc "/DAppVersion=$version" "/O$env:GITHUB_WORKSPACE" `
+            installer_stage\installer.iss
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
       - uses: actions/upload-artifact@v4
         with:
           name: windows
-          path: shuffle-windows-x86_64.zip
+          path: |
+            shuffle-windows-x86_64.zip
+            deadpool-windows-x86_64-installer.exe
 
   build-macos-universal:
     name: Build macOS (universal)
@@ -138,5 +217,8 @@ jobs:
           generate_release_notes: true
           files: |
             shuffle-linux-x86_64.tar.gz
+            deadpool-*-linux-x86_64.AppImage
+            pkgbuild-archlinux.tar.gz
             shuffle-windows-x86_64.zip
+            deadpool-windows-x86_64-installer.exe
             shuffle-macos-universal.tar.gz
