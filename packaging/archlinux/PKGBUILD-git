@@ -28,6 +28,7 @@ build() {
   cd "${pkgname}"
   export RUSTUP_TOOLCHAIN=stable
   export CARGO_TARGET_DIR=target
+  export RUSTFLAGS+=" --remap-path-prefix=${srcdir}=/"
   cargo build --release --frozen -p deadpool-cli -p deadpool
 }
 
