@@ -33,13 +33,6 @@ jobs:
       - name: Build deadpool (GUI)
         run: cargo build --release -p deadpool
 
-      - name: Package tar.gz
-        run: |
-          mkdir -p dist
-          cp target/release/deadpool-cli dist/deadpool-cli-linux-x86_64
-          cp target/release/deadpool     dist/deadpool-linux-x86_64
-          tar -czf deadpool-linux-x86_64.tar.gz -C dist .
-
       - name: Build AppImage
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
@@ -73,9 +66,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: linux
-          path: |
-            deadpool-linux-x86_64.tar.gz
-            deadpool-*-linux-x86_64.AppImage
+          path: deadpool-*-linux-x86_64.AppImage
 
   build-windows:
     name: Build Windows (x86_64)
@@ -95,13 +86,14 @@ jobs:
       - name: Build deadpool (GUI)
         run: cargo build --release -p deadpool
 
-      - name: Package zip
+      - name: Package portable zip
         shell: pwsh
         run: |
+          $version = $env:GITHUB_REF_NAME -replace '^v', ''
           New-Item -ItemType Directory -Force dist
-          Copy-Item target\release\deadpool-cli.exe dist\deadpool-cli-windows-x86_64.exe
-          Copy-Item target\release\deadpool.exe     dist\deadpool-windows-x86_64.exe
-          Compress-Archive -Path dist\* -DestinationPath deadpool-windows-x86_64.zip
+          Copy-Item target\release\deadpool-cli.exe dist\deadpool-cli.exe
+          Copy-Item target\release\deadpool.exe     dist\deadpool.exe
+          Compress-Archive -Path dist\* -DestinationPath "deadpool-$version-windows-portable.zip"
 
       - name: Build Windows installer
         shell: pwsh
@@ -118,16 +110,16 @@ jobs:
           Copy-Item packaging\windows\installer.iss  installer_stage\installer.iss
 
           $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
-          & $iscc "/DAppVersion=$version" "/O$env:GITHUB_WORKSPACE" `
-            installer_stage\installer.iss
+          & $iscc "/DAppVersion=$version" "/Fdeadpool-$version-windows-installer" `
+            "/O$env:GITHUB_WORKSPACE" installer_stage\installer.iss
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - uses: actions/upload-artifact@v4
         with:
           name: windows
           path: |
-            deadpool-windows-x86_64.zip
-            deadpool-windows-x86_64-installer.exe
+            deadpool-*-windows-portable.zip
+            deadpool-*-windows-installer.exe
 
   build-macos-universal:
     name: Build macOS (universal)
@@ -167,15 +159,16 @@ jobs:
 
       - name: Package
         run: |
+          VERSION="${GITHUB_REF_NAME#v}"
           mkdir -p dist
           cp deadpool-cli-macos-universal dist/
           cp deadpool-macos-universal     dist/
-          tar -czf deadpool-macos-universal.tar.gz -C dist .
+          tar -czf "deadpool-${VERSION}-macos-universal.tar.gz" -C dist .
 
       - uses: actions/upload-artifact@v4
         with:
           name: macos
-          path: deadpool-macos-universal.tar.gz
+          path: deadpool-*-macos-universal.tar.gz
 
   release:
     name: Publish GitHub Release
@@ -193,8 +186,7 @@ jobs:
         with:
           generate_release_notes: true
           files: |
-            deadpool-linux-x86_64.tar.gz
             deadpool-*-linux-x86_64.AppImage
-            deadpool-windows-x86_64.zip
-            deadpool-windows-x86_64-installer.exe
-            deadpool-macos-universal.tar.gz
+            deadpool-*-windows-portable.zip
+            deadpool-*-windows-installer.exe
+            deadpool-*-macos-universal.tar.gz
