@@ -4,5 +4,5 @@ Type=Application
 Name=Deadpool Password Generator
 Exec=shuffle_gui
 Icon=deadpool
-Categories=Utility;Security;
+Categories=Utility;
 Comment=Strong password generator

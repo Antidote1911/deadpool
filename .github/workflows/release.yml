@@ -66,30 +66,13 @@ jobs:
             --desktop-file AppDir/usr/share/applications/deadpool.desktop \
             --icon-file shuffle_gui/resources/icon.png
 
-          # Replace the generated AppRun with our custom launcher:
-          # default → GUI, --cli flag → CLI
-          cp packaging/linux/AppRun AppDir/AppRun
-          chmod +x AppDir/AppRun
+          # linuxdeploy creates AppRun as a symlink; remove it before
+          # installing our custom launcher (GUI by default, CLI with --cli)
+          rm -f AppDir/AppRun
+          install -m755 packaging/linux/AppRun AppDir/AppRun
 
-          APPIMAGE_EXTRACT_AND_RUN=1 ./appimagetool-x86_64.AppImage \
+          ARCH=x86_64 APPIMAGE_EXTRACT_AND_RUN=1 ./appimagetool-x86_64.AppImage \
             AppDir "deadpool-${VERSION}-linux-x86_64.AppImage"
-
-      - name: Generate PKGBUILD files
-        run: |
-          VERSION="${GITHUB_REF_NAME#v}"
-          SHA256=$(curl -fsSL \
-            "https://github.com/Antidote1911/deadpool/archive/refs/tags/${GITHUB_REF_NAME}.tar.gz" \
-            | sha256sum | awk '{print $1}')
-
-          mkdir -p pkgbuild_out
-
-          sed "s/@PKGVER@/${VERSION}/g; s/@SHA256@/${SHA256}/g" \
-            packaging/archlinux/PKGBUILD \
-            > pkgbuild_out/PKGBUILD
-
-          cp packaging/archlinux/PKGBUILD-git pkgbuild_out/PKGBUILD-git
-
-          tar -czf pkgbuild-archlinux.tar.gz -C pkgbuild_out .
 
       - uses: actions/upload-artifact@v4
         with:
@@ -97,7 +80,6 @@ jobs:
           path: |
             shuffle-linux-x86_64.tar.gz
             deadpool-*-linux-x86_64.AppImage
-            pkgbuild-archlinux.tar.gz
 
   build-windows:
     name: Build Windows (x86_64)
@@ -218,7 +200,6 @@ jobs:
           files: |
             shuffle-linux-x86_64.tar.gz
             deadpool-*-linux-x86_64.AppImage
-            pkgbuild-archlinux.tar.gz
             shuffle-windows-x86_64.zip
             deadpool-windows-x86_64-installer.exe
             shuffle-macos-universal.tar.gz
