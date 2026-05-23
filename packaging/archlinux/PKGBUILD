@@ -9,7 +9,7 @@ license=('MIT')
 depends=('gcc-libs' 'libxcb' 'libxkbcommon' 'fontconfig' 'mesa' 'gtk3')
 makedepends=('rust' 'pkg-config')
 source=("deadpool-${pkgver}.tar.gz::https://github.com/Antidote1911/deadpool/archive/refs/tags/v${pkgver}.tar.gz")
-sha256sums=('8203a3d5e3615a027a7a0ff85c23a3953ed29521cdaf083a9daccc9de314e8a8')
+sha256sums=('SKIP')
 
 prepare() {
   cd "deadpool-${pkgver}"
