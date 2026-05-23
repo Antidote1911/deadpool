@@ -28,7 +28,7 @@ build() {
   cd "${pkgname}"
   export RUSTUP_TOOLCHAIN=stable
   export CARGO_TARGET_DIR=target
-  cargo build --release -p deadpool-cli -p deadpool
+  cargo build --release --frozen -p deadpool-cli -p deadpool
 }
 
 package() {
