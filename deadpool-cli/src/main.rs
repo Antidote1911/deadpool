@@ -6,7 +6,7 @@ use std::fs::OpenOptions;
 
 use anyhow::{Context, Result};
 use clap::Parser;
-use deadpool::Pool;
+use deadpool_core::Pool;
 
 pub mod cli;
 

@@ -2,7 +2,7 @@
 Version=1.0
 Type=Application
 Name=Deadpool Password Generator
-Exec=shuffle_gui
+Exec=deadpool
 Icon=deadpool
 Categories=Utility;
 Comment=Strong password generator

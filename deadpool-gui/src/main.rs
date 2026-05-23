@@ -1,6 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use deadpool::Pool;
+use deadpool_core::Pool;
 use eframe::egui;
 
 const ACCENT: egui::Color32 = egui::Color32::from_rgb(255, 160, 47);

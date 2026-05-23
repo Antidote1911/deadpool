@@ -27,18 +27,18 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
-      - name: Build shuffle CLI
-        run: cargo build --release -p shuffle
+      - name: Build deadpool-cli
+        run: cargo build --release -p deadpool-cli
 
-      - name: Build shuffle GUI
-        run: cargo build --release -p shuffle_gui
+      - name: Build deadpool (GUI)
+        run: cargo build --release -p deadpool
 
       - name: Package tar.gz
         run: |
           mkdir -p dist
-          cp target/release/shuffle     dist/shuffle-linux-x86_64
-          cp target/release/shuffle_gui dist/shuffle_gui-linux-x86_64
-          tar -czf shuffle-linux-x86_64.tar.gz -C dist .
+          cp target/release/deadpool-cli dist/deadpool-cli-linux-x86_64
+          cp target/release/deadpool     dist/deadpool-linux-x86_64
+          tar -czf deadpool-linux-x86_64.tar.gz -C dist .
 
       - name: Build AppImage
         run: |
@@ -48,26 +48,22 @@ jobs:
           wget -q "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
           chmod +x linuxdeploy-x86_64.AppImage appimagetool-x86_64.AppImage
 
-          # Build AppDir skeleton
           mkdir -p AppDir/usr/bin
           mkdir -p AppDir/usr/share/applications
           mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
 
           cp packaging/linux/deadpool.desktop \
             AppDir/usr/share/applications/deadpool.desktop
-          cp shuffle_gui/resources/icon.png \
+          cp deadpool-gui/resources/icon.png \
             AppDir/usr/share/icons/hicolor/256x256/apps/deadpool.png
 
-          # Bundle both executables and their shared-library dependencies
           APPIMAGE_EXTRACT_AND_RUN=1 ./linuxdeploy-x86_64.AppImage \
             --appdir AppDir \
-            --executable target/release/shuffle \
-            --executable target/release/shuffle_gui \
+            --executable target/release/deadpool-cli \
+            --executable target/release/deadpool \
             --desktop-file AppDir/usr/share/applications/deadpool.desktop \
-            --icon-file shuffle_gui/resources/icon.png
+            --icon-file deadpool-gui/resources/icon.png
 
-          # linuxdeploy creates AppRun as a symlink; remove it before
-          # installing our custom launcher (GUI by default, CLI with --cli)
           rm -f AppDir/AppRun
           install -m755 packaging/linux/AppRun AppDir/AppRun
 
@@ -78,7 +74,7 @@ jobs:
         with:
           name: linux
           path: |
-            shuffle-linux-x86_64.tar.gz
+            deadpool-linux-x86_64.tar.gz
             deadpool-*-linux-x86_64.AppImage
 
   build-windows:
@@ -93,37 +89,34 @@ jobs:
         with:
           save-if: "false"
 
-      - name: Build shuffle CLI
-        run: cargo build --release -p shuffle
+      - name: Build deadpool-cli
+        run: cargo build --release -p deadpool-cli
 
-      - name: Build shuffle GUI
-        run: cargo build --release -p shuffle_gui
+      - name: Build deadpool (GUI)
+        run: cargo build --release -p deadpool
 
       - name: Package zip
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force dist
-          Copy-Item target\release\shuffle.exe     dist\shuffle-windows-x86_64.exe
-          Copy-Item target\release\shuffle_gui.exe dist\shuffle_gui-windows-x86_64.exe
-          Compress-Archive -Path dist\* -DestinationPath shuffle-windows-x86_64.zip
+          Copy-Item target\release\deadpool-cli.exe dist\deadpool-cli-windows-x86_64.exe
+          Copy-Item target\release\deadpool.exe     dist\deadpool-windows-x86_64.exe
+          Compress-Archive -Path dist\* -DestinationPath deadpool-windows-x86_64.zip
 
       - name: Build Windows installer
         shell: pwsh
         run: |
           $version = $env:GITHUB_REF_NAME -replace '^v', ''
 
-          # Convert the PNG icon to a multi-size ICO (ImageMagick is pre-installed)
-          magick "shuffle_gui\resources\icon.png" `
+          magick "deadpool-gui\resources\icon.png" `
             -define icon:auto-resize="256,128,64,48,32,16" icon.ico
 
-          # Stage all installer inputs in one directory
           New-Item -ItemType Directory -Force installer_stage
-          Copy-Item target\release\shuffle.exe     installer_stage\shuffle.exe
-          Copy-Item target\release\shuffle_gui.exe installer_stage\shuffle_gui.exe
-          Copy-Item icon.ico                        installer_stage\icon.ico
-          Copy-Item packaging\windows\installer.iss installer_stage\installer.iss
+          Copy-Item target\release\deadpool-cli.exe installer_stage\deadpool-cli.exe
+          Copy-Item target\release\deadpool.exe     installer_stage\deadpool.exe
+          Copy-Item icon.ico                         installer_stage\icon.ico
+          Copy-Item packaging\windows\installer.iss  installer_stage\installer.iss
 
-          # Compile — output lands in workspace root
           $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
           & $iscc "/DAppVersion=$version" "/O$env:GITHUB_WORKSPACE" `
             installer_stage\installer.iss
@@ -133,7 +126,7 @@ jobs:
         with:
           name: windows
           path: |
-            shuffle-windows-x86_64.zip
+            deadpool-windows-x86_64.zip
             deadpool-windows-x86_64-installer.exe
 
   build-macos-universal:
@@ -148,41 +141,41 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
-      - name: Build shuffle CLI (arm64 + x86_64)
+      - name: Build deadpool-cli (arm64 + x86_64)
         run: |
-          cargo build --release --target aarch64-apple-darwin -p shuffle
-          cargo build --release --target x86_64-apple-darwin  -p shuffle
+          cargo build --release --target aarch64-apple-darwin -p deadpool-cli
+          cargo build --release --target x86_64-apple-darwin  -p deadpool-cli
 
-      - name: Create universal shuffle binary
+      - name: Create universal deadpool-cli binary
         run: |
           lipo -create \
-            target/aarch64-apple-darwin/release/shuffle \
-            target/x86_64-apple-darwin/release/shuffle \
-            -output shuffle-macos-universal
+            target/aarch64-apple-darwin/release/deadpool-cli \
+            target/x86_64-apple-darwin/release/deadpool-cli \
+            -output deadpool-cli-macos-universal
 
-      - name: Build shuffle_gui (arm64 + x86_64)
+      - name: Build deadpool GUI (arm64 + x86_64)
         run: |
-          cargo build --release --target aarch64-apple-darwin -p shuffle_gui
-          cargo build --release --target x86_64-apple-darwin  -p shuffle_gui
+          cargo build --release --target aarch64-apple-darwin -p deadpool
+          cargo build --release --target x86_64-apple-darwin  -p deadpool
 
-      - name: Create universal shuffle_gui binary
+      - name: Create universal deadpool binary
         run: |
           lipo -create \
-            target/aarch64-apple-darwin/release/shuffle_gui \
-            target/x86_64-apple-darwin/release/shuffle_gui \
-            -output shuffle_gui-macos-universal
+            target/aarch64-apple-darwin/release/deadpool \
+            target/x86_64-apple-darwin/release/deadpool \
+            -output deadpool-macos-universal
 
       - name: Package
         run: |
           mkdir -p dist
-          cp shuffle-macos-universal     dist/
-          cp shuffle_gui-macos-universal dist/
-          tar -czf shuffle-macos-universal.tar.gz -C dist .
+          cp deadpool-cli-macos-universal dist/
+          cp deadpool-macos-universal     dist/
+          tar -czf deadpool-macos-universal.tar.gz -C dist .
 
       - uses: actions/upload-artifact@v4
         with:
           name: macos
-          path: shuffle-macos-universal.tar.gz
+          path: deadpool-macos-universal.tar.gz
 
   release:
     name: Publish GitHub Release
@@ -200,8 +193,8 @@ jobs:
         with:
           generate_release_notes: true
           files: |
-            shuffle-linux-x86_64.tar.gz
+            deadpool-linux-x86_64.tar.gz
             deadpool-*-linux-x86_64.AppImage
-            shuffle-windows-x86_64.zip
+            deadpool-windows-x86_64.zip
             deadpool-windows-x86_64-installer.exe
-            shuffle-macos-universal.tar.gz
+            deadpool-macos-universal.tar.gz

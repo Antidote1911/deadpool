@@ -2,9 +2,9 @@
 resolver = "2"
 
 members = [
-	"deadpool",
-	"shuffle_cli",
-	"shuffle_gui"
+	"deadpool-core",
+	"deadpool-cli",
+	"deadpool-gui"
 ]
 
 [workspace.package]

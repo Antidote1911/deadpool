@@ -1,0 +1,13 @@
+[package]
+name = "deadpool"
+version.workspace = true
+edition = "2021"
+
+[lints]
+workspace = true
+
+[dependencies]
+egui = "0.31.1"
+eframe = "0.31.1"
+image = "0.25.6"
+deadpool-core = { path = "../deadpool-core" }

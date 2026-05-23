@@ -29,17 +29,17 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-Name: "addtopath";   Description: "Add shuffle CLI to system PATH";  GroupDescription: "Additional tasks:"
+Name: "addtopath";   Description: "Add deadpool-cli to system PATH"; GroupDescription: "Additional tasks:"
 
 [Files]
-Source: "shuffle.exe";     DestDir: "{app}"; Flags: ignoreversion
-Source: "shuffle_gui.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "icon.ico";        DestDir: "{app}"; Flags: ignoreversion
+Source: "deadpool-cli.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "deadpool.exe";     DestDir: "{app}"; Flags: ignoreversion
+Source: "icon.ico";         DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
-Name: "{group}\Deadpool Password Generator";    Filename: "{app}\shuffle_gui.exe"; IconFilename: "{app}\icon.ico"
+Name: "{group}\Deadpool Password Generator";    Filename: "{app}\deadpool.exe"; IconFilename: "{app}\icon.ico"
 Name: "{group}\{cm:UninstallProgram,Deadpool}"; Filename: "{uninstallexe}"
-Name: "{autodesktop}\Deadpool Password Generator"; Filename: "{app}\shuffle_gui.exe"; IconFilename: "{app}\icon.ico"; Tasks: desktopicon
+Name: "{autodesktop}\Deadpool Password Generator"; Filename: "{app}\deadpool.exe"; IconFilename: "{app}\icon.ico"; Tasks: desktopicon
 
 [Registry]
 Root: HKLM; \
@@ -64,6 +64,6 @@ begin
 end;
 
 [Run]
-Filename: "{app}\shuffle_gui.exe"; \
+Filename: "{app}\deadpool.exe"; \
   Description: "{cm:LaunchProgram,Deadpool Password Generator}"; \
   Flags: nowait postinstall skipifsilent

@@ -21,14 +21,14 @@ build() {
   cd "deadpool-${pkgver}"
   export RUSTUP_TOOLCHAIN=stable
   export CARGO_TARGET_DIR=target
-  cargo build --release --locked -p shuffle -p shuffle_gui
+  cargo build --release --locked -p deadpool-cli -p deadpool
 }
 
 package() {
   cd "deadpool-${pkgver}"
-  install -Dm755 target/release/shuffle     "${pkgdir}/usr/bin/shuffle"
-  install -Dm755 target/release/shuffle_gui "${pkgdir}/usr/bin/shuffle_gui"
-  install -Dm644 shuffle_gui/resources/icon.png \
+  install -Dm755 target/release/deadpool-cli "${pkgdir}/usr/bin/deadpool-cli"
+  install -Dm755 target/release/deadpool     "${pkgdir}/usr/bin/deadpool"
+  install -Dm644 deadpool-gui/resources/icon.png \
     "${pkgdir}/usr/share/icons/hicolor/256x256/apps/deadpool.png"
 
   install -d "${pkgdir}/usr/share/applications"
@@ -37,9 +37,9 @@ package() {
 Version=1.0
 Type=Application
 Name=Deadpool Password Generator
-Exec=shuffle_gui
+Exec=deadpool
 Icon=deadpool
-Categories=Utility;Security;
+Categories=Utility;
 Comment=Strong password generator
 EOF
   chmod 644 "${pkgdir}/usr/share/applications/deadpool.desktop"

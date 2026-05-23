@@ -1,5 +1,5 @@
 [package]
-name = "deadpool"
+name = "deadpool-core"
 version.workspace = true
 edition = "2021"
 authors = ["Fabrice Corraire <antidote1911@gmail.com>"]
@@ -20,5 +20,5 @@ rand_hc = "0.4.0"
 thiserror = "2.0.12"
 
 [lib]
-name="deadpool"
-path="src/lib.rs"
+name = "deadpool_core"
+path = "src/lib.rs"
