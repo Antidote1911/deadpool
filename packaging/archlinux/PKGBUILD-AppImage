@@ -1,0 +1,44 @@
+# Maintainer: Antidote1911 <antidote1911@gmail.com>
+pkgname=deadpool-appimage
+pkgver=1.6.6
+pkgrel=1
+pkgdesc="Strong random password generator (CLI + GUI) — AppImage"
+arch=('x86_64')
+url="https://github.com/Antidote1911/deadpool"
+license=('MIT')
+depends=('fuse2')
+provides=('deadpool' 'deadpool-cli')
+conflicts=('deadpool' 'deadpool-git')
+options=('!strip')
+noextract=("deadpool-${pkgver}-linux-x86_64.AppImage")
+source=(
+  "deadpool-${pkgver}-linux-x86_64.AppImage::https://github.com/Antidote1911/deadpool/releases/download/v${pkgver}/deadpool-${pkgver}-linux-x86_64.AppImage"
+  "deadpool.png::https://raw.githubusercontent.com/Antidote1911/deadpool/v${pkgver}/deadpool-gui/resources/icon.png"
+)
+sha256sums=('SKIP'
+            'SKIP')
+
+package() {
+  install -Dm755 "deadpool-${pkgver}-linux-x86_64.AppImage" \
+    "${pkgdir}/opt/deadpool/deadpool.AppImage"
+
+  install -d "${pkgdir}/usr/bin"
+  ln -s /opt/deadpool/deadpool.AppImage "${pkgdir}/usr/bin/deadpool"
+  ln -s /opt/deadpool/deadpool.AppImage "${pkgdir}/usr/bin/deadpool-cli"
+
+  install -Dm644 deadpool.png \
+    "${pkgdir}/usr/share/icons/hicolor/256x256/apps/deadpool.png"
+
+  install -d "${pkgdir}/usr/share/applications"
+  cat > "${pkgdir}/usr/share/applications/deadpool.desktop" << 'EOF'
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Deadpool Password Generator
+Exec=deadpool
+Icon=deadpool
+Categories=Utility;
+Comment=Strong password generator
+EOF
+  chmod 644 "${pkgdir}/usr/share/applications/deadpool.desktop"
+}

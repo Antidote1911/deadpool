@@ -1,6 +1,6 @@
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](https://github.com/Antidote1911/deadpool/blob/master/LICENSE-MIT)
 [![made-with-rust](https://img.shields.io/badge/Made%20with-Rust-1f425f.svg)](https://www.rust-lang.org/)
-[![CI Tests](https://github.com/Antidote1911/deadpool/actions/workflows/tests.yml/badge.svg)](https://github.com/Antidote1911/deadpool/actions/workflows/tests.yml)
+[![CI](https://github.com/Antidote1911/deadpool/actions/workflows/release.yml/badge.svg)](https://github.com/Antidote1911/deadpool/actions/workflows/release.yml)
 [![Release](https://github.com/Antidote1911/deadpool/actions/workflows/release.yml/badge.svg)](https://github.com/Antidote1911/deadpool/actions/workflows/release.yml)
 [![Latest Release](https://img.shields.io/github/v/release/Antidote1911/deadpool)](https://github.com/Antidote1911/deadpool/releases/latest)
 
@@ -20,8 +20,8 @@ Des binaires pré-compilés pour Linux, Windows et macOS (Universal) sont dispon
 |---|---|
 | Linux x86\_64 | `deadpool-{version}-linux-x86_64.AppImage` |
 | Windows x86\_64 (portable) | `deadpool-{version}-windows-portable.zip` |
-| Windows x86\_64 (installeur) | `deadpool-{version}-windows-installer.exe` |
-| macOS Universal (arm64 + x86\_64) | `deadpool-{version}-macos-universal.tar.gz` |
+| Windows x86\_64 (installeur) | `deadpool-{version}-win-setup.exe` |
+| macOS Universal (arm64 + x86\_64) | `deadpool-{version}-universal-macos.dmg` |
 
 L'AppImage Linux et le zip portable Windows contiennent chacun deux binaires :
 - `deadpool-cli` / `deadpool-cli.exe` — outil en ligne de commande
@@ -29,7 +29,18 @@ L'AppImage Linux et le zip portable Windows contiennent chacun deux binaires :
 
 ## Installation sur Arch Linux
 
-Deux PKGBUILDs sont fournis dans `packaging/archlinux/`.
+Trois PKGBUILDs sont fournis dans `packaging/archlinux/`.
+
+**AppImage** (`PKGBUILD-AppImage`) — télécharge l'AppImage pré-compilée, aucune compilation requise :
+
+```bash
+mkdir -p ~/builds/deadpool-appimage && cd ~/builds/deadpool-appimage
+curl -O https://raw.githubusercontent.com/Antidote1911/deadpool/master/packaging/archlinux/PKGBUILD-AppImage
+mv PKGBUILD-AppImage PKGBUILD
+makepkg -si
+```
+
+Installe `/opt/deadpool/deadpool.AppImage` et crée les symlinks `/usr/bin/deadpool` et `/usr/bin/deadpool-cli`. Nécessite `fuse2`.
 
 **Version stable** (`PKGBUILD`) — compile depuis la dernière version taguée sur GitHub :
 
@@ -97,6 +108,44 @@ let password = pool.generate(25)?;
 
 Les mots de passe générés contiennent toujours au moins un caractère de chaque groupe sélectionné.
 Sans argument, le mot de passe généré fait 10 caractères et utilise des lettres minuscules et des chiffres.
+
+### Utiliser la CLI via l'AppImage Linux
+
+L'AppImage embarque à la fois l'interface graphique et la CLI. La méthode recommandée est d'utiliser le script d'installation fourni, qui télécharge la dernière release sous un nom sans version et crée deux symlinks — les mises à jour ne cassent ni vos habitudes ni vos scripts :
+
+```bash
+curl -sL https://raw.githubusercontent.com/Antidote1911/deadpool/master/packaging/linux/install.sh | bash
+```
+
+Cela installe dans `~/.local/bin/` :
+- `deadpool` — lance l'interface graphique
+- `deadpool-cli` — lance directement l'outil en ligne de commande
+
+```bash
+deadpool-cli -ld -L 20
+deadpool-cli --count 3 -L 30 -ldm --include "@éèà"
+deadpool-cli --help
+```
+
+**Installation manuelle** — si vous préférez placer l'AppImage vous-même :
+
+```bash
+# Sauvegarder l'AppImage sans numéro de version
+mv deadpool-*-linux-x86_64.AppImage ~/.local/bin/deadpool.AppImage
+chmod +x ~/.local/bin/deadpool.AppImage
+
+# Créer les symlinks
+ln -sf deadpool.AppImage ~/.local/bin/deadpool
+ln -sf deadpool.AppImage ~/.local/bin/deadpool-cli
+```
+
+L'AppImage accepte aussi `--cli` comme premier argument si vous l'invoquez directement :
+
+```bash
+./deadpool.AppImage --cli -ld -L 20
+```
+
+### Exemples
 
 ```
 # équivalent à ./deadpool-cli -ld -L 10

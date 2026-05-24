@@ -1,15 +1,50 @@
-name: Release
+name: CI / Release
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [master]
+    tags: ['v*']
+  pull_request:
+    branches: [master]
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: fmt
+        run: cargo fmt --all -- --check
+
+      - name: clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Run tests
+        run: cargo test --workspace
+
   build-linux:
+    needs: [lint, test]
+    if: startsWith(github.ref, 'refs/tags/v')
     name: Build Linux (x86_64)
     runs-on: ubuntu-latest
     steps:
@@ -69,6 +104,8 @@ jobs:
           path: deadpool-*-linux-x86_64.AppImage
 
   build-windows:
+    needs: [lint, test]
+    if: startsWith(github.ref, 'refs/tags/v')
     name: Build Windows (x86_64)
     runs-on: windows-latest
     steps:
@@ -110,7 +147,7 @@ jobs:
           Copy-Item packaging\windows\installer.iss  installer_stage\installer.iss
 
           $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
-          & $iscc "/DAppVersion=$version" "/Fdeadpool-$version-windows-installer" `
+          & $iscc "/DAppVersion=$version" "/Fdeadpool-$version-win-setup" `
             "/O$env:GITHUB_WORKSPACE" installer_stage\installer.iss
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
@@ -119,9 +156,11 @@ jobs:
           name: windows
           path: |
             deadpool-*-windows-portable.zip
-            deadpool-*-windows-installer.exe
+            deadpool-*-win-setup.exe
 
   build-macos-universal:
+    needs: [lint, test]
+    if: startsWith(github.ref, 'refs/tags/v')
     name: Build macOS (universal)
     runs-on: macos-latest
     steps:
@@ -157,22 +196,26 @@ jobs:
             target/x86_64-apple-darwin/release/deadpool \
             -output deadpool-macos-universal
 
-      - name: Package
+      - name: Package DMG
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
           mkdir -p dist
           cp deadpool-cli-macos-universal dist/
           cp deadpool-macos-universal     dist/
-          tar -czf "deadpool-${VERSION}-macos-universal.tar.gz" -C dist .
+          hdiutil create -volname "deadpool-${VERSION}" \
+            -srcfolder dist \
+            -ov -format UDZO \
+            "deadpool-${VERSION}-universal-macos.dmg"
 
       - uses: actions/upload-artifact@v4
         with:
           name: macos
-          path: deadpool-*-macos-universal.tar.gz
+          path: deadpool-*-universal-macos.dmg
 
   release:
     name: Publish GitHub Release
     needs: [build-linux, build-windows, build-macos-universal]
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -188,5 +231,5 @@ jobs:
           files: |
             deadpool-*-linux-x86_64.AppImage
             deadpool-*-windows-portable.zip
-            deadpool-*-windows-installer.exe
-            deadpool-*-macos-universal.tar.gz
+            deadpool-*-win-setup.exe
+            deadpool-*-universal-macos.dmg
