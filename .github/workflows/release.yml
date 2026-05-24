@@ -130,7 +130,7 @@ jobs:
           New-Item -ItemType Directory -Force dist
           Copy-Item target\release\deadpool-cli.exe dist\deadpool-cli.exe
           Copy-Item target\release\deadpool.exe     dist\deadpool.exe
-          Compress-Archive -Path dist\* -DestinationPath "deadpool-$version-windows-portable.zip"
+          Compress-Archive -Path dist\* -DestinationPath "deadpool-$version-win-portable.zip"
 
       - name: Build Windows installer
         shell: pwsh
@@ -155,7 +155,7 @@ jobs:
         with:
           name: windows
           path: |
-            deadpool-*-windows-portable.zip
+            deadpool-*-win-portable.zip
             deadpool-*-win-setup.exe
 
   build-macos-universal:
@@ -230,6 +230,6 @@ jobs:
           generate_release_notes: true
           files: |
             deadpool-*-linux-x86_64.AppImage
-            deadpool-*-windows-portable.zip
+            deadpool-*-win-portable.zip
             deadpool-*-win-setup.exe
             deadpool-*-universal-macos.dmg

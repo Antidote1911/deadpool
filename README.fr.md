@@ -19,7 +19,7 @@ Des binaires pré-compilés pour Linux, Windows et macOS (Universal) sont dispon
 | Plateforme | Archive |
 |---|---|
 | Linux x86\_64 | `deadpool-{version}-linux-x86_64.AppImage` |
-| Windows x86\_64 (portable) | `deadpool-{version}-windows-portable.zip` |
+| Windows x86\_64 (portable) | `deadpool-{version}-win-portable.zip` |
 | Windows x86\_64 (installeur) | `deadpool-{version}-win-setup.exe` |
 | macOS Universal (arm64 + x86\_64) | `deadpool-{version}-universal-macos.dmg` |
 
