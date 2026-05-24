@@ -4,34 +4,34 @@
 [![Release](https://github.com/Antidote1911/deadpool/actions/workflows/release.yml/badge.svg)](https://github.com/Antidote1911/deadpool/actions/workflows/release.yml)
 [![Latest Release](https://img.shields.io/github/v/release/Antidote1911/deadpool)](https://github.com/Antidote1911/deadpool/releases/latest)
 
-> [Version française](README.fr.md)
+> [English version](README.md)
 
-# 🔑 Deadpool and Deadpool-CLI
+# 🔑 Deadpool et Deadpool-CLI
 
-**Deadpool** is a Rust crate to generate secure passwords. **Deadpool-CLI** is a command-line application and **Deadpool** is a graphical interface built on top of it.
+**Deadpool** est une crate Rust pour générer des mots de passe sécurisés. **Deadpool-CLI** est une application en ligne de commande et **Deadpool** est une interface graphique construite par-dessus.
 
 <img src='screenshots/deadpool_screenshot.png'/>
 
-## Download pre-built binaries
+## Télécharger les binaires pré-compilés
 
-Pre-built binaries for Linux, Windows, and macOS (Universal) are available on the [Releases page](https://github.com/Antidote1911/deadpool/releases/latest).
+Des binaires pré-compilés pour Linux, Windows et macOS (Universal) sont disponibles sur la [page des releases](https://github.com/Antidote1911/deadpool/releases/latest).
 
-| Platform | Archive |
+| Plateforme | Archive |
 |---|---|
 | Linux x86\_64 | `deadpool-{version}-linux-x86_64.AppImage` |
 | Windows x86\_64 (portable) | `deadpool-{version}-windows-portable.zip` |
-| Windows x86\_64 (installer) | `deadpool-{version}-windows-installer.exe` |
+| Windows x86\_64 (installeur) | `deadpool-{version}-windows-installer.exe` |
 | macOS Universal (arm64 + x86\_64) | `deadpool-{version}-macos-universal.tar.gz` |
 
-The Linux AppImage and the Windows portable zip each contain two binaries:
-- `deadpool-cli` / `deadpool-cli.exe` — command-line tool
-- `deadpool` / `deadpool.exe` — graphical interface
+L'AppImage Linux et le zip portable Windows contiennent chacun deux binaires :
+- `deadpool-cli` / `deadpool-cli.exe` — outil en ligne de commande
+- `deadpool` / `deadpool.exe` — interface graphique
 
-## Install on Arch Linux
+## Installation sur Arch Linux
 
-Two PKGBUILDs are provided in `packaging/archlinux/`.
+Deux PKGBUILDs sont fournis dans `packaging/archlinux/`.
 
-**Stable release** (`PKGBUILD`) — builds from the latest tagged version on GitHub:
+**Version stable** (`PKGBUILD`) — compile depuis la dernière version taguée sur GitHub :
 
 ```bash
 mkdir -p ~/builds/deadpool && cd ~/builds/deadpool
@@ -39,7 +39,7 @@ curl -O https://raw.githubusercontent.com/Antidote1911/deadpool/master/packaging
 makepkg -si
 ```
 
-**Git version** (`PKGBUILD-git`) — builds from the latest commit on `master`, installs as `deadpool-git` (conflicts with `deadpool`):
+**Version Git** (`PKGBUILD-git`) — compile depuis le dernier commit sur `master`, s'installe sous le nom `deadpool-git` (en conflit avec `deadpool`) :
 
 ```bash
 mkdir -p ~/builds/deadpool-git && cd ~/builds/deadpool-git
@@ -48,23 +48,23 @@ mv PKGBUILD-git PKGBUILD
 makepkg -si
 ```
 
-Or clone the repo and use the files directly:
+Ou clonez le dépôt et utilisez les fichiers directement :
 
 ```bash
 git clone https://github.com/Antidote1911/deadpool
 cd deadpool/packaging/archlinux
-# for stable:
+# pour la version stable :
 makepkg -si -p PKGBUILD
-# for git:
+# pour la version git :
 makepkg -si -p PKGBUILD-git
 ```
 
-Both packages install:
-- `/usr/bin/deadpool-cli` — command-line tool
-- `/usr/bin/deadpool` — graphical interface
-- A `.desktop` entry and icon for the GUI
+Les deux paquets installent :
+- `/usr/bin/deadpool-cli` — outil en ligne de commande
+- `/usr/bin/deadpool` — interface graphique
+- Une entrée `.desktop` et une icône pour l'interface graphique
 
-## Usage for Deadpool crate
+## Utilisation de la crate Deadpool
 
 ```rust
 use deadpool_core::Pool;
@@ -74,14 +74,14 @@ pool.extend_from_uppercase();
 pool.extend_from_digits();
 pool.extend_from_dashes();
 pool.extend_from_string("@é=")?;
-pool.exclude_chars("0Oo1iIlL5S"); // exclude ambiguous chars
+pool.exclude_chars("0Oo1iIlL5S"); // exclure les caractères ambigus
 
 let password = pool.generate(25)?;
 ```
 
-## Character sets
+## Jeux de caractères
 
-| Flag | Characters |
+| Option | Caractères |
 |---|---|
 | `-u` / `--uppercase` | `ABCDEFGHIJKLMNOPQRSTUVWXYZ` |
 | `-l` / `--lowercase` | `abcdefghijklmnopqrstuvwxyz` |
@@ -93,18 +93,18 @@ let password = pool.generate(25)?;
 | `-m` / `--math` | `!*+<=>?` |
 | `--logograms` | `#$%&@^\`~` |
 
-## Usage for deadpool-cli
+## Utilisation de deadpool-cli
 
-The generated passwords always contain at least one character from each selected group.
-Without arguments, the generated password is 10 characters long and uses lowercase letters and numbers.
+Les mots de passe générés contiennent toujours au moins un caractère de chaque groupe sélectionné.
+Sans argument, le mot de passe généré fait 10 caractères et utilise des lettres minuscules et des chiffres.
 
 ```
-# equivalent to ./deadpool-cli -ld -L 10
+# équivalent à ./deadpool-cli -ld -L 10
 ./deadpool-cli
 uabhbunf0q
 ```
 
-Generate 3 passwords with 30 chars using lowercase, digits, math symbols, and include `@ é è à % M`:
+Générer 3 mots de passe de 30 caractères avec minuscules, chiffres, symboles mathématiques, et inclure `@ é è à % M` :
 ```
 ./deadpool-cli --count 3 -L 30 -ldm --include "@éèà%M"
 0c3mi<l1=Ma6xfujp>ddc3%%*n76èp
@@ -112,15 +112,15 @@ Generate 3 passwords with 30 chars using lowercase, digits, math symbols, and in
 tz6z99iwà1h!s+Mg4iv5t%@%5kenq8
 ```
 
-Generate a password with 30 chars using only digits, excluding 0–5:
+Générer un mot de passe de 30 caractères avec uniquement des chiffres, en excluant 0–5 :
 ```
 ./deadpool-cli -d -L 30 --exclude 012345
 879866968679799766976867796776
 ```
 
-> The `--exclude` option takes precedence over `--include`. A character added with `--include` is always removed by `--exclude`.
+> L'option `--exclude` a priorité sur `--include`. Un caractère ajouté avec `--include` est toujours supprimé par `--exclude`.
 
-Full help:
+Aide complète :
 ```
 ./deadpool-cli -h
 
@@ -146,16 +146,16 @@ Options:
   -h, --help               Print help
   -V, --version            Print version
 
-If you do not specify any of the [--uppercase, --lowercase, --digits] flags, then lowercase and digits will be used.
+Si vous ne spécifiez aucun des drapeaux [--uppercase, --lowercase, --digits], alors les minuscules et les chiffres seront utilisés.
 ```
 
-## Build from source
+## Compiler depuis les sources
 
-Clone the repo and build with Cargo:
+Clonez le dépôt et compilez avec Cargo :
 ```
 git clone https://github.com/Antidote1911/deadpool
 cd deadpool
 cargo build --release
 ```
 
-Binaries are written to `target/release/`.
+Les binaires sont générés dans `target/release/`.
