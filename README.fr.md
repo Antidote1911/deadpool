@@ -8,7 +8,7 @@
 
 # 🔑 Deadpool et Deadpool-CLI
 
-**Deadpool** est une crate Rust pour générer des mots de passe sécurisés. **Deadpool-CLI** est une application en ligne de commande et **Deadpool** est une interface graphique construite par-dessus.
+Ce dépôt contient trois composants : **deadpool-core**, une bibliothèque Rust pour générer des mots de passe sécurisés ; **deadpool-cli**, un outil en ligne de commande ; et **deadpool**, une interface graphique — les deux construits par-dessus la bibliothèque core.
 
 <img src='screenshots/deadpool_screenshot.png'/>
 
