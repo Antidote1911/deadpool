@@ -135,3 +135,4 @@ dist/
 __pycache__/
 .claude/
 .idea/
+build/
