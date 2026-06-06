@@ -1012,24 +1012,18 @@ checksum = "f27ae1dd37df86211c42e150270f82743308803d90a6f6e6651cd730d5e1732f"
 name = "deadpool"
 version = "1.6.7"
 dependencies = [
- "deadpool-core",
- "eframe",
- "egui",
- "image",
- "winresource",
-]
-
-[[package]]
-name = "deadpool-cli"
-version = "1.6.7"
-dependencies = [
  "anyhow",
  "assert_cmd",
  "clap",
  "deadpool-core",
+ "eframe",
+ "egui",
  "enable-ansi-support",
+ "image",
  "predicates",
  "tempfile",
+ "windows-sys 0.52.0",
+ "winresource",
 ]
 
 [[package]]

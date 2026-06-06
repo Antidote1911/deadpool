@@ -7,7 +7,7 @@ arch=('x86_64')
 url="https://github.com/Antidote1911/deadpool"
 license=('MIT')
 depends=('fuse2')
-provides=('deadpool' 'deadpool-cli')
+provides=('deadpool')
 conflicts=('deadpool' 'deadpool-git')
 options=('!strip')
 noextract=("deadpool-${pkgver}-linux-x86_64.AppImage")
@@ -24,7 +24,6 @@ package() {
 
   install -d "${pkgdir}/usr/bin"
   ln -s /opt/deadpool/deadpool.AppImage "${pkgdir}/usr/bin/deadpool"
-  ln -s /opt/deadpool/deadpool.AppImage "${pkgdir}/usr/bin/deadpool-cli"
 
   install -Dm644 deadpool.png \
     "${pkgdir}/usr/share/icons/hicolor/256x256/apps/deadpool.png"

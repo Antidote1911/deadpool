@@ -21,12 +21,11 @@ curl -L "$DOWNLOAD_URL" -o "$INSTALL_DIR/$APPIMAGE_NAME"
 chmod +x "$INSTALL_DIR/$APPIMAGE_NAME"
 
 ln -sf "$APPIMAGE_NAME" "$INSTALL_DIR/deadpool"
-ln -sf "$APPIMAGE_NAME" "$INSTALL_DIR/deadpool-cli"
 
 echo ""
 echo "Installed to $INSTALL_DIR:"
-echo "  deadpool      -> graphical interface"
-echo "  deadpool-cli  -> command-line tool"
+echo "  deadpool           -> graphical interface (no arguments)"
+echo "  deadpool [options] -> command-line tool   (with arguments)"
 echo ""
 if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
   echo "Note: add $INSTALL_DIR to your PATH:"

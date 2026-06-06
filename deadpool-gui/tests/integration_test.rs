@@ -28,8 +28,11 @@ mod tests {
 
     #[test]
     fn test_generate_password_default_length() {
+        // No-arg invocation opens the GUI; pass -d to trigger CLI mode and
+        // verify that the default length of 10 is still respected.
         for _ in 0..30 {
             cmd()
+                .arg("-d")
                 .assert()
                 .stdout(predicate::function(|s: &str| s.trim().len() == 10));
         }
@@ -95,13 +98,11 @@ mod tests {
 
     #[test]
     fn test_output_argument() {
-        // Création d'un fichier temporaire
         let output_file = NamedTempFile::new().expect("Impossible de créer un fichier temporaire");
         let output_path = output_file.path();
 
         let expected_length = 20;
 
-        // Exécution de la commande
         let mut cmd = Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap();
         cmd.args([
             "--output",
@@ -113,7 +114,6 @@ mod tests {
         .assert()
         .success();
 
-        // Vérification du contenu du fichier
         let output_content =
             std::fs::read_to_string(output_path).expect("Échec de la lecture du fichier de sortie");
         assert_eq!(
@@ -125,32 +125,30 @@ mod tests {
 
     #[test]
     fn test_generate_password_include_chars() {
-        // Caractères à inclure et longueur
         let include_chars = "abc123";
         let length = 12;
 
-        // Exécuter la commande avec les arguments spécifiés
         cmd()
             .args(["-L", &length.to_string(), "--include", include_chars])
             .assert()
-            .success()           // La commande ne doit pas échouer
+            .success()
             .stdout(predicate::function(move |s: &str| {
                 let password = s.trim();
                 password.len() == length && password.chars().all(|c| include_chars.contains(c))
-            })); // Vérifie le motif
+            }));
     }
 
     #[test]
     fn test_generate_password_only_one_char() {
-        let include_chars = "X"; // Caractère à inclure
-        let length = 12; // Longueur du mot de passe à générer
-        let expected_output = "XXXXXXXXXXXX\n"; // Résultat attendu
+        let include_chars = "X";
+        let length = 12;
+        let expected_output = "XXXXXXXXXXXX\n";
 
         let mut command = cmd();
         command
             .args(["-L", &length.to_string(), "--include", include_chars])
             .assert()
             .success()
-            .stdout(predicate::eq(expected_output)); // Vérifie que la sortie correspond exactement à ce qui est attendu
+            .stdout(predicate::eq(expected_output));
     }
 }

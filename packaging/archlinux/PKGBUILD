@@ -22,13 +22,12 @@ build() {
   export RUSTUP_TOOLCHAIN=stable
   export CARGO_TARGET_DIR=target
   export RUSTFLAGS+=" --remap-path-prefix=${srcdir}=/"
-  cargo build --release --frozen -p deadpool-cli -p deadpool
+  cargo build --release --frozen -p deadpool
 }
 
 package() {
   cd "deadpool-${pkgver}"
-  install -Dm755 target/release/deadpool-cli "${pkgdir}/usr/bin/deadpool-cli"
-  install -Dm755 target/release/deadpool     "${pkgdir}/usr/bin/deadpool"
+  install -Dm755 target/release/deadpool "${pkgdir}/usr/bin/deadpool"
   install -Dm644 deadpool-gui/resources/icon.png \
     "${pkgdir}/usr/share/icons/hicolor/256x256/apps/deadpool.png"
 

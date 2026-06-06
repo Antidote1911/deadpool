@@ -1,7 +1,12 @@
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+use std::io::Write;
 
+use anyhow::{Context, Result};
+use clap::Parser;
 use deadpool_core::Pool;
 use eframe::egui;
+
+pub mod cli;
+use cli::Cli;
 
 const ACCENT: egui::Color32 = egui::Color32::from_rgb(255, 160, 47);
 const BTN_INACTIVE: egui::Color32 = egui::Color32::from_rgb(65, 65, 65);
@@ -164,7 +169,105 @@ fn toggle_btn(ui: &mut egui::Ui, label: &str, state: &mut bool, width: f32) -> b
     clicked
 }
 
-fn main() -> eframe::Result {
+fn main() -> Result<()> {
+    if std::env::args().len() > 1 {
+        run_cli()
+    } else {
+        run_gui().map_err(|e| anyhow::anyhow!("{e}"))
+    }
+}
+
+fn run_cli() -> Result<()> {
+    #[cfg(windows)]
+    enable_ansi_support::enable_ansi_support()
+        .context("Unable to enable ANSI support on Windows")?;
+
+    let mut cli = Cli::parse();
+    cli.validate().unwrap();
+
+    let mut pool = Pool::new();
+    configure_pool(&mut pool, &cli)?;
+
+    if pool.is_empty() {
+        pool.extend_from_lowercase();
+        pool.extend_from_digits();
+    }
+
+    let mut output_file = if let Some(output_path) = cli.output() {
+        Some(
+            std::fs::OpenOptions::new()
+                .create(true)
+                .append(true)
+                .open(output_path)
+                .context("Unable to open or create output file")?,
+        )
+    } else {
+        None
+    };
+
+    for _ in 0..cli.count() {
+        match pool.generate(cli.length()) {
+            Ok(password) => {
+                let generated_password = password.clone();
+                println!("{generated_password}");
+                if let Some(file) = output_file.as_mut() {
+                    writeln!(file, "{generated_password}")
+                        .context("Unable to write password to file")?;
+                }
+            }
+            Err(e) => eprintln!("Error generating password: {e}"),
+        }
+    }
+
+    Ok(())
+}
+
+fn configure_pool(pool: &mut Pool, cli: &Cli) -> Result<()> {
+    if cli.uppercase {
+        pool.extend_from_uppercase();
+    }
+    if cli.lowercase {
+        pool.extend_from_lowercase();
+    }
+    if cli.digits {
+        pool.extend_from_digits();
+    }
+    if cli.braces {
+        pool.extend_from_braces();
+    }
+    if cli.punctuation {
+        pool.extend_from_punctuation();
+    }
+    if cli.quotes {
+        pool.extend_from_quotes();
+    }
+    if cli.dashes {
+        pool.extend_from_dashes();
+    }
+    if cli.math {
+        pool.extend_from_math();
+    }
+    if cli.logograms {
+        pool.extend_from_logograms();
+    }
+
+    if let Some(include) = cli.include() {
+        pool.extend_from_string(&include)?;
+    }
+    if let Some(exclude) = cli.exclude() {
+        pool.exclude_chars(&exclude);
+    }
+    Ok(())
+}
+
+fn run_gui() -> eframe::Result {
+    // On Windows, detach from any console so no terminal window stays open
+    // when the user launches the GUI by double-clicking.
+    #[cfg(windows)]
+    unsafe {
+        windows_sys::Win32::System::Console::FreeConsole();
+    }
+
     let icon = include_bytes!("../resources/icon.png");
     let image = image::load_from_memory(icon).expect("Failed to load icon");
     let rgba = image.to_rgba8();

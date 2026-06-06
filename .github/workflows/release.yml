@@ -62,10 +62,7 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
-      - name: Build deadpool-cli
-        run: cargo build --release -p deadpool-cli
-
-      - name: Build deadpool (GUI)
+      - name: Build deadpool
         run: cargo build --release -p deadpool
 
       - name: Build AppImage
@@ -87,7 +84,6 @@ jobs:
 
           APPIMAGE_EXTRACT_AND_RUN=1 ./linuxdeploy-x86_64.AppImage \
             --appdir AppDir \
-            --executable target/release/deadpool-cli \
             --executable target/release/deadpool \
             --desktop-file AppDir/usr/share/applications/deadpool.desktop \
             --icon-file deadpool-gui/resources/icon.png
@@ -117,10 +113,7 @@ jobs:
         with:
           save-if: "false"
 
-      - name: Build deadpool-cli
-        run: cargo build --release -p deadpool-cli
-
-      - name: Build deadpool (GUI)
+      - name: Build deadpool
         run: cargo build --release -p deadpool
 
       - name: Package portable zip
@@ -128,8 +121,7 @@ jobs:
         run: |
           $version = $env:GITHUB_REF_NAME -replace '^v', ''
           New-Item -ItemType Directory -Force dist
-          Copy-Item target\release\deadpool-cli.exe dist\deadpool-cli.exe
-          Copy-Item target\release\deadpool.exe     dist\deadpool.exe
+          Copy-Item target\release\deadpool.exe dist\deadpool.exe
           Compress-Archive -Path dist\* -DestinationPath "deadpool-$version-win-portable.zip"
 
       - name: Build Windows installer
@@ -141,7 +133,6 @@ jobs:
             -define icon:auto-resize="256,128,64,48,32,16" icon.ico
 
           New-Item -ItemType Directory -Force installer_stage
-          Copy-Item target\release\deadpool-cli.exe installer_stage\deadpool-cli.exe
           Copy-Item target\release\deadpool.exe     installer_stage\deadpool.exe
           Copy-Item icon.ico                         installer_stage\icon.ico
           Copy-Item packaging\windows\installer.iss  installer_stage\installer.iss
@@ -172,19 +163,7 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
-      - name: Build deadpool-cli (arm64 + x86_64)
-        run: |
-          cargo build --release --target aarch64-apple-darwin -p deadpool-cli
-          cargo build --release --target x86_64-apple-darwin  -p deadpool-cli
-
-      - name: Create universal deadpool-cli binary
-        run: |
-          lipo -create \
-            target/aarch64-apple-darwin/release/deadpool-cli \
-            target/x86_64-apple-darwin/release/deadpool-cli \
-            -output deadpool-cli-macos-universal
-
-      - name: Build deadpool GUI (arm64 + x86_64)
+      - name: Build deadpool (arm64 + x86_64)
         run: |
           cargo build --release --target aarch64-apple-darwin -p deadpool
           cargo build --release --target x86_64-apple-darwin  -p deadpool
@@ -200,8 +179,7 @@ jobs:
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
           mkdir -p dist
-          cp deadpool-cli-macos-universal dist/
-          cp deadpool-macos-universal     dist/
+          cp deadpool-macos-universal dist/
           hdiutil create -volname "deadpool-${VERSION}" \
             -srcfolder dist \
             -ov -format UDZO \

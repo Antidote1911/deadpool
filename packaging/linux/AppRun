@@ -3,10 +3,4 @@ SELF=$(readlink -f "$0")
 HERE=${SELF%/*}
 export PATH="${HERE}/usr/bin:${PATH}"
 export LD_LIBRARY_PATH="${HERE}/usr/lib:${LD_LIBRARY_PATH}"
-if [ "$(basename "$0")" = "deadpool-cli" ]; then
-  exec "${HERE}/usr/bin/deadpool-cli" "$@"
-elif [ "${1}" = "--cli" ]; then
-  exec "${HERE}/usr/bin/deadpool-cli" "${@:2}"
-else
-  exec "${HERE}/usr/bin/deadpool" "$@"
-fi
+exec "${HERE}/usr/bin/deadpool" "$@"

@@ -29,12 +29,11 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-Name: "addtopath";   Description: "Add deadpool-cli to system PATH"; GroupDescription: "Additional tasks:"
+Name: "addtopath";   Description: "Add deadpool to system PATH (enables CLI usage)"; GroupDescription: "Additional tasks:"
 
 [Files]
-Source: "deadpool-cli.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "deadpool.exe";     DestDir: "{app}"; Flags: ignoreversion
-Source: "icon.ico";         DestDir: "{app}"; Flags: ignoreversion
+Source: "deadpool.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "icon.ico";     DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\Deadpool Password Generator";    Filename: "{app}\deadpool.exe"; IconFilename: "{app}\icon.ico"

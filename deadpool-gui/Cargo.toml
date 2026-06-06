@@ -1,16 +1,48 @@
 [package]
 name = "deadpool"
 version.workspace = true
+authors = ["Antidote1911 <antidote1911@gmail.com>"]
+license = "MIT"
+description = "🔑 Random password generator (GUI + CLI)"
+keywords = ["gui", "cli", "password"]
+categories = ["command-line-utilities"]
+homepage = "https://github.com/Antidote1911/deadpool"
+repository = "https://github.com/Antidote1911/deadpool"
 edition = "2021"
 
-[lints]
-workspace = true
+# workspace lints replicated here so unsafe_code can be allowed (needed for
+# FreeConsole on Windows to detach the console window in GUI mode).
+[lints.rust]
+unsafe_code = "allow"
+unused_imports = "warn"
+dead_code = "warn"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+must_use_candidate = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+module_name_repetitions = "allow"
+struct_excessive_bools = "allow"
+too_many_lines = "allow"
 
 [dependencies]
 egui = "0.31.1"
 eframe = "0.31.1"
 image = "0.25.6"
 deadpool-core = { path = "../deadpool-core" }
+clap = { version = "4.5.35", features = ["derive", "cargo"] }
+anyhow = "1.0.97"
+
+[target.'cfg(windows)'.dependencies]
+enable-ansi-support = "0.2.1"
+windows-sys = { version = "0.52", features = ["Win32_System_Console"] }
+
+[dev-dependencies]
+assert_cmd = "2.0.16"
+predicates = "3.1.3"
+tempfile = "3.19.1"
 
 [build-dependencies]
 winresource = "0.1"
