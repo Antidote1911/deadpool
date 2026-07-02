@@ -1,0 +1,27 @@
+[package]
+name = "deadpool-ffi"
+version.workspace = true
+edition = "2021"
+authors = ["Antidote1911 <antidote1911@gmail.com>"]
+description = "C FFI wrapper for deadpool-core"
+license = "MIT"
+
+[lints.rust]
+unsafe_code = "allow"
+unused_imports = "warn"
+dead_code = "warn"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+must_use_candidate = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+module_name_repetitions = "allow"
+
+[lib]
+name = "deadpool_ffi"
+crate-type = ["staticlib"]
+
+[dependencies]
+deadpool-core = { path = "../deadpool-core" }

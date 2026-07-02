@@ -1010,7 +1010,7 @@ checksum = "f27ae1dd37df86211c42e150270f82743308803d90a6f6e6651cd730d5e1732f"
 
 [[package]]
 name = "deadpool"
-version = "1.6.7"
+version = "1.6.8"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -1028,11 +1028,18 @@ dependencies = [
 
 [[package]]
 name = "deadpool-core"
-version = "1.6.7"
+version = "1.6.8"
 dependencies = [
  "rand 0.9.4",
  "rand_hc",
  "thiserror 2.0.18",
+]
+
+[[package]]
+name = "deadpool-ffi"
+version = "1.6.8"
+dependencies = [
+ "deadpool-core",
 ]
 
 [[package]]

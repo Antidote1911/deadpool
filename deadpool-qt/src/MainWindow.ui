@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QWidget" name="MainWindow">
+  <property name="geometry">
+   <rect><x>0</x><y>0</y><width>600</width><height>660</height></rect>
+  </property>
+  <property name="minimumSize">
+   <size><width>520</width><height>540</height></size>
+  </property>
+  <property name="windowTitle">
+   <string>Strong Password Generator</string>
+  </property>
+
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing"><number>6</number></property>
+   <property name="leftMargin"><number>10</number></property>
+   <property name="topMargin"><number>10</number></property>
+   <property name="rightMargin"><number>10</number></property>
+   <property name="bottomMargin"><number>10</number></property>
+
+   <!-- ── Title ─────────────────────────────────────────────────────────── -->
+   <item>
+    <widget class="QLabel" name="titleLabel">
+     <property name="text"><string>🔑  Strong Password Generator</string></property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="line1">
+     <property name="frameShape"><enum>QFrame::Shape::HLine</enum></property>
+     <property name="frameShadow"><enum>QFrame::Shadow::Sunken</enum></property>
+    </widget>
+   </item>
+
+   <!-- ── Charset row 1 ──────────────────────────────────────────────────── -->
+   <item>
+    <layout class="QHBoxLayout" name="charsetRow1">
+     <property name="spacing"><number>4</number></property>
+     <item>
+      <widget class="QPushButton" name="btnUppercase">
+       <property name="text"><string>A-Z</string></property>
+       <property name="checkable"><bool>true</bool></property>
+       <property name="checked"><bool>true</bool></property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnLowercase">
+       <property name="text"><string>a-z</string></property>
+       <property name="checkable"><bool>true</bool></property>
+       <property name="checked"><bool>true</bool></property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnDigits">
+       <property name="text"><string>0-9</string></property>
+       <property name="checkable"><bool>true</bool></property>
+       <property name="checked"><bool>true</bool></property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnLogograms">
+       <property name="text"><string>#$%&amp;@^`~</string></property>
+       <property name="checkable"><bool>true</bool></property>
+       <property name="checked"><bool>false</bool></property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnMath">
+       <property name="text"><string>&lt;&gt;*+!?=</string></property>
+       <property name="checkable"><bool>true</bool></property>
+       <property name="checked"><bool>false</bool></property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+
+   <!-- ── Charset row 2 ──────────────────────────────────────────────────── -->
+   <item>
+    <layout class="QHBoxLayout" name="charsetRow2">
+     <property name="spacing"><number>4</number></property>
+     <item>
+      <widget class="QPushButton" name="btnPunctuation">
+       <property name="text"><string>.,:;</string></property>
+       <property name="checkable"><bool>true</bool></property>
+       <property name="checked"><bool>false</bool></property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnQuotes">
+       <property name="text"><string>&quot; '</string></property>
+       <property name="checkable"><bool>true</bool></property>
+       <property name="checked"><bool>false</bool></property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnDashes">
+       <property name="text"><string>\ / | _ -</string></property>
+       <property name="checkable"><bool>true</bool></property>
+       <property name="checked"><bool>false</bool></property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnBraces">
+       <property name="text"><string>{ [ ( ) ] }</string></property>
+       <property name="checkable"><bool>true</bool></property>
+       <property name="checked"><bool>false</bool></property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="charsetRow2Spacer">
+       <property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property>
+       <property name="sizeType"><enum>QSizePolicy::Policy::Expanding</enum></property>
+       <property name="sizeHint" stdset="0">
+        <size><width>40</width><height>20</height></size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+
+   <item>
+    <widget class="QFrame" name="line2">
+     <property name="frameShape"><enum>QFrame::Shape::HLine</enum></property>
+     <property name="frameShadow"><enum>QFrame::Shadow::Sunken</enum></property>
+    </widget>
+   </item>
+
+   <!-- ── Length ──────────────────────────────────────────────────────────── -->
+   <item>
+    <layout class="QHBoxLayout" name="lengthLayout">
+     <item>
+      <widget class="QLabel" name="lengthLabel">
+       <property name="text"><string>Length:</string></property>
+       <property name="minimumSize"><size><width>130</width><height>0</height></size></property>
+       <property name="maximumSize"><size><width>130</width><height>16777215</height></size></property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="lengthSlider">
+       <property name="minimum"><number>1</number></property>
+       <property name="maximum"><number>200</number></property>
+       <property name="value"><number>20</number></property>
+       <property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="lengthSpin">
+       <property name="minimum"><number>1</number></property>
+       <property name="maximum"><number>200</number></property>
+       <property name="value"><number>20</number></property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+
+   <item>
+    <widget class="QFrame" name="line3">
+     <property name="frameShape"><enum>QFrame::Shape::HLine</enum></property>
+     <property name="frameShadow"><enum>QFrame::Shadow::Sunken</enum></property>
+    </widget>
+   </item>
+
+   <!-- ── Include / Exclude ──────────────────────────────────────────────── -->
+   <item>
+    <layout class="QGridLayout" name="fieldsLayout">
+     <property name="spacing"><number>6</number></property>
+     <item row="0" column="0">
+      <widget class="QLabel" name="includeLabel">
+       <property name="text"><string>Also include:</string></property>
+      </widget>
+     </item>
+     <item row="0" column="1" colspan="2">
+      <widget class="QLineEdit" name="includeEdit">
+       <property name="placeholderText"><string>extra characters to include</string></property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="excludeLabel">
+       <property name="text"><string>Do not include:</string></property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="excludeEdit">
+       <property name="placeholderText"><string>characters to exclude</string></property>
+      </widget>
+     </item>
+     <item row="1" column="2">
+      <widget class="QPushButton" name="btnLookalike">
+       <property name="text"><string>Add Look-alike</string></property>
+       <property name="toolTip">
+        <string>Exclude characters that look similar: l B G I O 0 1 6 8 o | .</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+
+   <item>
+    <widget class="QFrame" name="line4">
+     <property name="frameShape"><enum>QFrame::Shape::HLine</enum></property>
+     <property name="frameShadow"><enum>QFrame::Shadow::Sunken</enum></property>
+    </widget>
+   </item>
+
+   <!-- ── Number of passwords ────────────────────────────────────────────── -->
+   <item>
+    <layout class="QHBoxLayout" name="countLayout">
+     <item>
+      <widget class="QLabel" name="countLabel">
+       <property name="text"><string>Number of passwords:</string></property>
+       <property name="minimumSize"><size><width>165</width><height>0</height></size></property>
+       <property name="maximumSize"><size><width>165</width><height>16777215</height></size></property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="countSlider">
+       <property name="minimum"><number>1</number></property>
+       <property name="maximum"><number>50</number></property>
+       <property name="value"><number>1</number></property>
+       <property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="countSpin">
+       <property name="minimum"><number>1</number></property>
+       <property name="maximum"><number>50</number></property>
+       <property name="value"><number>1</number></property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+
+   <item>
+    <widget class="QFrame" name="line5">
+     <property name="frameShape"><enum>QFrame::Shape::HLine</enum></property>
+     <property name="frameShadow"><enum>QFrame::Shadow::Sunken</enum></property>
+    </widget>
+   </item>
+
+   <!-- ── Action buttons ─────────────────────────────────────────────────── -->
+   <item>
+    <layout class="QHBoxLayout" name="actionLayout">
+     <item>
+      <widget class="QPushButton" name="btnGenerate">
+       <property name="text"><string>🔄  Generate Passwords</string></property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnCopyAll">
+       <property name="text"><string>📋  Copy All</string></property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+
+   <!-- ── Status label ───────────────────────────────────────────────────── -->
+   <item>
+    <widget class="QLabel" name="statusLabel">
+     <property name="text"><string/></property>
+     <property name="wordWrap"><bool>true</bool></property>
+    </widget>
+   </item>
+
+   <!-- ── Password list ──────────────────────────────────────────────────── -->
+   <item>
+    <widget class="QListWidget" name="passwordList">
+     <property name="cursor"><cursorShape>PointingHandCursor</cursorShape></property>
+     <property name="font">
+      <font><family>monospace</family></font>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>1</verstretch>
+      </sizepolicy>
+     </property>
+    </widget>
+   </item>
+
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
