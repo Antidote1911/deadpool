@@ -160,7 +160,10 @@ fn toggle_btn(ui: &mut egui::Ui, label: &str, state: &mut bool, width: f32) -> b
     };
     let btn = egui::Button::new(egui::RichText::new(label).color(text_color).size(13.5))
         .fill(fill)
-        .stroke(egui::Stroke::new(1.0, egui::Color32::from_rgb(30, 30, 30)))
+        .stroke(egui::Stroke::new(
+            1.0_f32,
+            egui::Color32::from_rgb(30, 30, 30),
+        ))
         .corner_radius(5.0);
     let clicked = ui.add_sized([width, 30.0], btn).clicked();
     if clicked {
@@ -399,7 +402,10 @@ impl eframe::App for AppState {
 
                         let lookalike_btn = egui::Button::new("Add Look-alike")
                             .fill(BTN_INACTIVE)
-                            .stroke(egui::Stroke::new(1.0, egui::Color32::from_rgb(90, 90, 90)))
+                            .stroke(egui::Stroke::new(
+                                1.0_f32,
+                                egui::Color32::from_rgb(90, 90, 90),
+                            ))
                             .corner_radius(5.0);
                         if ui
                             .add(lookalike_btn)
@@ -446,7 +452,10 @@ impl eframe::App for AppState {
                 let copy_btn =
                     egui::Button::new(egui::RichText::new("📋 Copy All").color(BTN_INACTIVE_TEXT))
                         .fill(BTN_INACTIVE)
-                        .stroke(egui::Stroke::new(1.0, egui::Color32::from_rgb(90, 90, 90)))
+                        .stroke(egui::Stroke::new(
+                            1.0_f32,
+                            egui::Color32::from_rgb(90, 90, 90),
+                        ))
                         .corner_radius(6.0);
                 if ui
                     .add_enabled(!self.generated.is_empty(), copy_btn)

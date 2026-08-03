@@ -23,11 +23,7 @@ fn clear_last_error() {
 /// The pointer is valid until the next FFI call on this thread.
 #[no_mangle]
 pub extern "C" fn deadpool_last_error() -> *const c_char {
-    LAST_ERROR.with(|e| {
-        e.borrow()
-            .as_ref()
-            .map_or(std::ptr::null(), |s| s.as_ptr())
-    })
+    LAST_ERROR.with(|e| e.borrow().as_ref().map_or(std::ptr::null(), |s| s.as_ptr()))
 }
 
 // ── Version ───────────────────────────────────────────────────────────────────
@@ -68,7 +64,7 @@ pub unsafe extern "C" fn deadpool_pool_is_empty(pool: *const Pool) -> c_int {
     if pool.is_null() {
         return 1;
     }
-    if unsafe { &*pool }.is_empty() { 1 } else { 0 }
+    c_int::from(unsafe { &*pool }.is_empty())
 }
 
 // ── Charset extension helpers ─────────────────────────────────────────────────
@@ -86,15 +82,15 @@ macro_rules! ffi_extend {
     };
 }
 
-ffi_extend!(deadpool_extend_lowercase,   extend_from_lowercase);
-ffi_extend!(deadpool_extend_uppercase,   extend_from_uppercase);
-ffi_extend!(deadpool_extend_digits,      extend_from_digits);
-ffi_extend!(deadpool_extend_braces,      extend_from_braces);
+ffi_extend!(deadpool_extend_lowercase, extend_from_lowercase);
+ffi_extend!(deadpool_extend_uppercase, extend_from_uppercase);
+ffi_extend!(deadpool_extend_digits, extend_from_digits);
+ffi_extend!(deadpool_extend_braces, extend_from_braces);
 ffi_extend!(deadpool_extend_punctuation, extend_from_punctuation);
-ffi_extend!(deadpool_extend_quotes,      extend_from_quotes);
-ffi_extend!(deadpool_extend_dashes,      extend_from_dashes);
-ffi_extend!(deadpool_extend_math,        extend_from_math);
-ffi_extend!(deadpool_extend_logograms,   extend_from_logograms);
+ffi_extend!(deadpool_extend_quotes, extend_from_quotes);
+ffi_extend!(deadpool_extend_dashes, extend_from_dashes);
+ffi_extend!(deadpool_extend_math, extend_from_math);
+ffi_extend!(deadpool_extend_logograms, extend_from_logograms);
 
 // ── Include / Exclude ─────────────────────────────────────────────────────────
 
@@ -114,11 +110,20 @@ pub unsafe extern "C" fn deadpool_extend_from_string(
     }
     let s = match unsafe { CStr::from_ptr(chars) }.to_str() {
         Ok(s) => s,
-        Err(e) => { set_last_error(&e.to_string()); return -1; }
+        Err(e) => {
+            set_last_error(&e.to_string());
+            return -1;
+        }
     };
     match unsafe { &mut *pool }.extend_from_string(s) {
-        Ok(()) => { clear_last_error(); 0 }
-        Err(e) => { set_last_error(&e.to_string()); -1 }
+        Ok(()) => {
+            clear_last_error();
+            0
+        }
+        Err(e) => {
+            set_last_error(&e.to_string());
+            -1
+        }
     }
 }
 
@@ -168,6 +173,9 @@ pub unsafe extern "C" fn deadpool_generate(
             clear_last_error();
             0
         }
-        Err(e) => { set_last_error(&e.to_string()); -1 }
+        Err(e) => {
+            set_last_error(&e.to_string());
+            -1
+        }
     }
 }
