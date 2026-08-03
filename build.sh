@@ -138,30 +138,30 @@ fi
 title "Compilation Qt (deadpool-qt)"
 
 QT_BUILD_DIR="deadpool-qt/build"
-QT_STATIC_CMAKE="/home/antidote/qt6-static/lib/cmake/Qt6/Qt6Config.cmake"
 
 if ! command -v cmake &>/dev/null; then
   warn "cmake introuvable — compilation Qt ignorée."
-elif [[ ! -f "$QT_STATIC_CMAKE" ]]; then
-  warn "qt6-static introuvable ($QT_STATIC_CMAKE) — compilation Qt ignorée."
 else
   generator=""
   command -v ninja &>/dev/null && generator="-GNinja"
 
   info "Configuration CMake dans ${QT_BUILD_DIR}..."
-  cmake -B "$QT_BUILD_DIR" -S deadpool-qt \
+  if cmake -B "$QT_BUILD_DIR" -S deadpool-qt \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-        ${generator}
+        ${generator}; then
 
-  info "Compilation sur ${CORES} cœurs..."
-  if cmake --build "$QT_BUILD_DIR" --parallel "$CORES"; then
-    echo ""
-    success "Qt GUI compilé."
-    info "GUI  Qt   : ${BOLD}${QT_BUILD_DIR}/deadpool-qt${RESET}"
+    info "Compilation sur ${CORES} cœurs..."
+    if cmake --build "$QT_BUILD_DIR" --parallel "$CORES"; then
+      echo ""
+      success "Qt GUI compilé."
+      info "GUI  Qt   : ${BOLD}${QT_BUILD_DIR}/deadpool-qt${RESET}"
+    else
+      echo ""
+      error "La compilation Qt a échoué."
+      exit 1
+    fi
   else
-    echo ""
-    error "La compilation Qt a échoué."
-    exit 1
+    warn "Qt6 (Widgets) introuvable — compilation Qt ignorée."
   fi
 fi

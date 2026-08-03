@@ -7,9 +7,6 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-# ── Static Qt6 prefix (override with -DCMAKE_PREFIX_PATH=...) ────────────────
-list(PREPEND CMAKE_PREFIX_PATH "/home/antidote/qt6-static")
-
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
 # ── Build the Rust FFI static library via Cargo ───────────────────────────────
@@ -56,14 +53,6 @@ target_link_libraries(deadpool-qt PRIVATE
     "${DEADPOOL_FFI_LIB}"
     pthread
     dl
-)
-
-# ── Static platform plugin import ─────────────────────────────────────────────
-# Qt6::QXcbIntegrationPlugin is defined by Qt6Gui (loaded transitively via
-# Qt6Widgets). With a static Qt build the plugin is not auto-discovered at
-# runtime, so we link and import it explicitly.
-qt_import_plugins(deadpool-qt
-    INCLUDE Qt6::QXcbIntegrationPlugin
 )
 
 # Warnings
