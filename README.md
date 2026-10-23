@@ -29,51 +29,21 @@ The Linux AppImage and the Windows portable zip each contain two binaries:
 
 ## Install on Arch Linux
 
-Three PKGBUILDs are provided in `packaging/archlinux/`.
+`deadpool` (graphical interface) is available in the **[packarch]** repository. Add it to `/etc/pacman.conf`:
 
-**AppImage** (`PKGBUILD-AppImage`) — downloads the pre-built AppImage, no compilation required:
-
-```bash
-mkdir -p ~/builds/deadpool-appimage && cd ~/builds/deadpool-appimage
-curl -O https://raw.githubusercontent.com/Antidote1911/deadpool/master/packaging/archlinux/PKGBUILD-AppImage
-mv PKGBUILD-AppImage PKGBUILD
-makepkg -si
+```ini
+[packarch]
+SigLevel = Optional TrustAll
+Server = https://antidote1911.github.io/myrepo/$arch
 ```
 
-Installs `/opt/deadpool/deadpool.AppImage` and creates `/usr/bin/deadpool` and `/usr/bin/deadpool-cli` symlinks. Requires `fuse2`.
-
-**Stable release** (`PKGBUILD`) — builds from the latest tagged version on GitHub:
+then:
 
 ```bash
-mkdir -p ~/builds/deadpool && cd ~/builds/deadpool
-curl -O https://raw.githubusercontent.com/Antidote1911/deadpool/master/packaging/archlinux/PKGBUILD
-makepkg -si
+sudo pacman -Sy deadpool
 ```
 
-**Git version** (`PKGBUILD-git`) — builds from the latest commit on `master`, installs as `deadpool-git` (conflicts with `deadpool`):
-
-```bash
-mkdir -p ~/builds/deadpool-git && cd ~/builds/deadpool-git
-curl -O https://raw.githubusercontent.com/Antidote1911/deadpool/master/packaging/archlinux/PKGBUILD-git
-mv PKGBUILD-git PKGBUILD
-makepkg -si
-```
-
-Or clone the repo and use the files directly:
-
-```bash
-git clone https://github.com/Antidote1911/deadpool
-cd deadpool/packaging/archlinux
-# for stable:
-makepkg -si -p PKGBUILD
-# for git:
-makepkg -si -p PKGBUILD-git
-```
-
-Both packages install:
-- `/usr/bin/deadpool-cli` — command-line tool
-- `/usr/bin/deadpool` — graphical interface
-- A `.desktop` entry and icon for the GUI
+The PKGBUILD is maintained in [myrepo-pkgs](https://github.com/Antidote1911/myrepo-pkgs) (`apps/deadpool`) and builds the latest tagged version. On any other distribution, use the AppImage of the [releases page](https://github.com/Antidote1911/deadpool/releases/latest).
 
 ## Usage for Deadpool crate
 

@@ -71,34 +71,6 @@ for crate in "${MEMBER_CRATES[@]}"; do
   fi
 done
 
-# ── Synchronisation des fichiers de packaging ─────────────────────────────────
-title "Fichiers de packaging"
-
-declare -A PACKAGING_FILES=(
-  ["packaging/archlinux/PKGBUILD"]="pkgver"
-  ["packaging/archlinux/PKGBUILD-AppImage"]="pkgver"
-)
-
-for file in "${!PACKAGING_FILES[@]}"; do
-  field="${PACKAGING_FILES[$file]}"
-
-  if [[ ! -f "$file" ]]; then
-    warn "$file introuvable — ignoré."
-    continue
-  fi
-
-  file_ver=$(grep -m1 "^${field}=" "$file" | cut -d= -f2 | tr -d '[:space:]')
-
-  if [[ -z "$file_ver" ]]; then
-    warn "$file : champ '${field}' introuvable — ignoré."
-  elif [[ "$file_ver" == "$WORKSPACE_VERSION" ]]; then
-    success "$file  →  ${field}=${file_ver}  ✓"
-  else
-    sed -i "s/^${field}=${file_ver}$/${field}=${WORKSPACE_VERSION}/" "$file"
-    warn "$file : ${field} ${file_ver} → ${WORKSPACE_VERSION}  (mis à jour)"
-  fi
-done
-
 # ── Bilan ─────────────────────────────────────────────────────────────────────
 echo ""
 sep

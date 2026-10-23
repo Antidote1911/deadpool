@@ -29,51 +29,21 @@ L'AppImage Linux et le zip portable Windows contiennent chacun deux binaires :
 
 ## Installation sur Arch Linux
 
-Trois PKGBUILDs sont fournis dans `packaging/archlinux/`.
+`deadpool` (interface graphique) est disponible dans le dépôt **[packarch]**. Ajoutez-le à `/etc/pacman.conf` :
 
-**AppImage** (`PKGBUILD-AppImage`) — télécharge l'AppImage pré-compilée, aucune compilation requise :
-
-```bash
-mkdir -p ~/builds/deadpool-appimage && cd ~/builds/deadpool-appimage
-curl -O https://raw.githubusercontent.com/Antidote1911/deadpool/master/packaging/archlinux/PKGBUILD-AppImage
-mv PKGBUILD-AppImage PKGBUILD
-makepkg -si
+```ini
+[packarch]
+SigLevel = Optional TrustAll
+Server = https://antidote1911.github.io/myrepo/$arch
 ```
 
-Installe `/opt/deadpool/deadpool.AppImage` et crée les symlinks `/usr/bin/deadpool` et `/usr/bin/deadpool-cli`. Nécessite `fuse2`.
-
-**Version stable** (`PKGBUILD`) — compile depuis la dernière version taguée sur GitHub :
+puis :
 
 ```bash
-mkdir -p ~/builds/deadpool && cd ~/builds/deadpool
-curl -O https://raw.githubusercontent.com/Antidote1911/deadpool/master/packaging/archlinux/PKGBUILD
-makepkg -si
+sudo pacman -Sy deadpool
 ```
 
-**Version Git** (`PKGBUILD-git`) — compile depuis le dernier commit sur `master`, s'installe sous le nom `deadpool-git` (en conflit avec `deadpool`) :
-
-```bash
-mkdir -p ~/builds/deadpool-git && cd ~/builds/deadpool-git
-curl -O https://raw.githubusercontent.com/Antidote1911/deadpool/master/packaging/archlinux/PKGBUILD-git
-mv PKGBUILD-git PKGBUILD
-makepkg -si
-```
-
-Ou clonez le dépôt et utilisez les fichiers directement :
-
-```bash
-git clone https://github.com/Antidote1911/deadpool
-cd deadpool/packaging/archlinux
-# pour la version stable :
-makepkg -si -p PKGBUILD
-# pour la version git :
-makepkg -si -p PKGBUILD-git
-```
-
-Les deux paquets installent :
-- `/usr/bin/deadpool-cli` — outil en ligne de commande
-- `/usr/bin/deadpool` — interface graphique
-- Une entrée `.desktop` et une icône pour l'interface graphique
+Le PKGBUILD est maintenu dans [myrepo-pkgs](https://github.com/Antidote1911/myrepo-pkgs) (`apps/deadpool`) et compile la dernière version taguée. Sur une autre distribution, utilisez l'AppImage de la [page des releases](https://github.com/Antidote1911/deadpool/releases/latest).
 
 ## Utilisation de la crate Deadpool
 
